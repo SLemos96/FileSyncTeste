@@ -124,45 +124,43 @@ public class Login extends javax.swing.JFrame {
     
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         try {
-            // TODO add your handling code here:
-            FileReader arquivoDeDados = new FileReader("dados.txt");
-            BufferedReader LerArqDados = new BufferedReader(arquivoDeDados);
+            char[] senha = SenhaDoUsuario.getPassword();
+            String senhaString = new String(senha);
             
-            String linha = LerArqDados.readLine();
-            String data[] = new String[2]; // guarda usuário no espaço [0] e senha no espaço [1]
-            while(linha != null)
-            {
-                data = linha.split(":");
-                linha = LerArqDados.readLine();
-                char[] senha = SenhaDoUsuario.getPassword();
-                String senhaString = new String(senha);
-                if(LoginDoUsuario.getText().equals(data[0]))
-                {
-                    if(senhaString.equals(data[1])){
-                    System.out.println("Você logou com sucessssssssssooo!!!");
-                    avisoDeLogin.setText("Login feito com sucesso!");
-                    break;
-                    }
-                    else{
-                        System.out.println("Senha incorreta!");
-                        avisoDeLogin.setText("Senha Incorreta!");
-                        //new AvisoLogin().setVisible(true);
-                        break;
-                    }
-                }
-                else{
-                    if(linha == null)
-                    {
-                        System.out.println("Login inexistente!!");
-                        avisoDeLogin.setText("Usuário Inexistente!");
-                    }
-                }
+            if (autenticarUsuario(LoginDoUsuario.getText(), senhaString)) {
+                avisoDeLogin.setText("Login feito com sucesso!");
+            } else {
+                avisoDeLogin.setText("Usuário ou Senha incorreta!");
             }
         } catch (IOException ex) {
             Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_LoginButtonActionPerformed
 
+    public boolean autenticarUsuario(String user, String password) 
+        throws IOException{
+            boolean sucesso = false;
+            // TODO add your handling code here:
+            FileReader arquivoDeDados = new FileReader("dados.txt");
+            BufferedReader lerArqDados = new BufferedReader(arquivoDeDados);
+            
+            String line =  lerArqDados.readLine();
+            String data[] = null;// guarda usuário no espaço [0] e senha no espaço [1]            
+            
+            while (line != null) { 
+                data = line.split(":");
+                if(user.toLowerCase().equals(data[0]) && password.equals(data[1])) {
+                    System.out.println("Você logou com sucessssssssssooo!!!");
+                    sucesso = true;
+                }
+                line = lerArqDados.readLine();
+            }
+            if(!sucesso) {
+                System.out.println("Usuário ou Senha incorreta!");
+            }
+        return sucesso;
+    }
+    
     /**
      * @param args the command line arguments
      */
