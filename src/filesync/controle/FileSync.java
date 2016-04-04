@@ -23,7 +23,6 @@ public class FileSync {
     
     public FileSync() {
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
-        servidor = new ServidorTCP(portaPadrao);
         cliente = new Cliente();
     }
 
@@ -32,6 +31,7 @@ public class FileSync {
     }
         
     public void iniciar() {
+        servidor = new ServidorTCP(portaPadrao);
         new LoginScreen().setVisible(true);
         servidor.aguardarConexao();        
     }
