@@ -7,6 +7,8 @@ package filesync.screens;
 
 import java.io.File;
 import javax.swing.JFileChooser;
+import filesync.controle.EscolhaDiretorio;
+import filesync.controle.AutenticadorUsuario;
 
 /**
  *
@@ -17,11 +19,13 @@ public class MainScreen extends javax.swing.JFrame {
     /**
      * Creates new form MainScreen
      */
-    File file1;
-    File file2;
+    private String pathOrigem;
+    private String pathDestino;
+    private EscolhaDiretorio ed;
     
     public MainScreen() {
         initComponents();
+        ed = new EscolhaDiretorio();
     }
 
     /**
@@ -237,38 +241,29 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
-        JFileChooser fc = new JFileChooser();
-        file1 = fc.getSelectedFile();
+        
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        JFileChooser fc = new JFileChooser();
-        fc.showOpenDialog(jLabel1);        
-        file1 = fc.getSelectedFile();     
-        jTextField1.setText(file1.getAbsolutePath());
-
-        
-        
+        pathOrigem = ed.escolherDiretorio().getAbsolutePath();
+        jTextField1.setText(pathOrigem);   
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        JFileChooser fc = new JFileChooser();
-        fc.showOpenDialog(jLabel1);        
-        file2 = fc.getSelectedFile();     
-        jTextField1.setText(file2.getAbsolutePath());
-        
+        pathDestino = ed.escolherDiretorio().getAbsolutePath();
+        jTextField2.setText(pathDestino);        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        File temp = file1;
-        file1 = file2;
-        file2 = temp;
+        String temp = pathOrigem;
+        pathOrigem = pathDestino;
+        pathDestino = temp;
         
-        jTextField1.setText(file1.getAbsolutePath());
-        jTextField2.setText(file2.getAbsolutePath());
+        jTextField1.setText(pathOrigem);
+        jTextField2.setText(pathDestino);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
@@ -277,7 +272,7 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         // TODO add your handling code here:
-        new Login().setVisible(true);
+        new LoginScreen().setVisible(true);
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     /**

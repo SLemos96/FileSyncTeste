@@ -5,6 +5,8 @@
  */
 package filesync.screens;
 
+import filesync.controle.AutenticadorUsuario;
+import filesync.persistencia.BDArquivo;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -16,13 +18,15 @@ import java.util.logging.Logger;
  *
  * @author samue
  */
-public class Login extends javax.swing.JFrame {
+public class LoginScreen extends javax.swing.JFrame {
 
+    private AutenticadorUsuario autenticador;
     /**
      * Creates new form LoginButton
      */
-    public Login() {
+    public LoginScreen() {
         initComponents();
+        this.autenticador = new AutenticadorUsuario(new BDArquivo());
     }
 
     /**
@@ -40,6 +44,9 @@ public class Login extends javax.swing.JFrame {
         SenhaDoUsuario = new javax.swing.JPasswordField();
         LoginButton = new javax.swing.JButton();
         avisoDeLogin = new javax.swing.JLabel();
+        IPDestLabel = new javax.swing.JLabel();
+        jCheckBoxIPLocal = new javax.swing.JCheckBox();
+        IPDestino = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -70,28 +77,53 @@ public class Login extends javax.swing.JFrame {
 
         avisoDeLogin.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
+        IPDestLabel.setText("IP_Dest:");
+
+        jCheckBoxIPLocal.setText("IP Local");
+        jCheckBoxIPLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxIPLocalActionPerformed(evt);
+            }
+        });
+
+        IPDestino.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                IPDestinoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(109, Short.MAX_VALUE)
-                .addComponent(LoginButton)
-                .addGap(105, 105, 105))
             .addGroup(layout.createSequentialGroup()
                 .addGap(35, 35, 35)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(SenhaDoUsuario)
-                    .addComponent(LoginDoUsuario))
-                .addGap(35, 35, 35))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addGap(20, 20, 20)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
+                            .addComponent(LoginDoUsuario))
+                        .addGap(75, 75, 75))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(IPDestLabel)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addComponent(LoginButton)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(IPDestino)
+                                .addGap(12, 12, 12)
+                                .addComponent(jCheckBoxIPLocal))))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(avisoDeLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(37, 37, 37))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -104,11 +136,16 @@ public class Login extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(IPDestLabel)
+                    .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxIPLocal))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(LoginButton)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(avisoDeLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         pack();
@@ -123,44 +160,30 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_SenhaDoUsuarioActionPerformed
     
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        try {
-            char[] senha = SenhaDoUsuario.getPassword();
-            String senhaString = new String(senha);
-            
-            if (autenticarUsuario(LoginDoUsuario.getText(), senhaString)) {
-                avisoDeLogin.setText("Login feito com sucesso!");
-            } else {
-                avisoDeLogin.setText("Usuário ou Senha incorreta!");
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        char[] senha = SenhaDoUsuario.getPassword();
+        String senhaString = new String(senha);
+        String login = LoginDoUsuario.getText();
+        
+        if (autenticador.autenticarUsuario(login, senhaString)) {
+            avisoDeLogin.setText("Login feito com sucesso!");
+        } else {
+            avisoDeLogin.setText("Usuário ou Senha incorreta!");
         }
     }//GEN-LAST:event_LoginButtonActionPerformed
 
-    public boolean autenticarUsuario(String user, String password) 
-        throws IOException{
-            boolean sucesso = false;
-            // TODO add your handling code here:
-            FileReader arquivoDeDados = new FileReader("dados.txt");
-            BufferedReader lerArqDados = new BufferedReader(arquivoDeDados);
-            
-            String line =  lerArqDados.readLine();
-            String data[] = null;// guarda usuário no espaço [0] e senha no espaço [1]            
-            
-            while (line != null) { 
-                data = line.split(":");
-                if(user.toLowerCase().equals(data[0]) && password.equals(data[1])) {
-                    System.out.println("Você logou com sucessssssssssooo!!!");
-                    sucesso = true;
-                }
-                line = lerArqDados.readLine();
-            }
-            if(!sucesso) {
-                System.out.println("Usuário ou Senha incorreta!");
-            }
-        return sucesso;
-    }
-    
+    private void jCheckBoxIPLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxIPLocalActionPerformed
+        // TODO add your handling code here:
+        if (jCheckBoxIPLocal.isSelected())
+            IPDestino.setText("localhost");
+        else 
+            IPDestino.setText("");
+        
+    }//GEN-LAST:event_jCheckBoxIPLocalActionPerformed
+
+    private void IPDestinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPDestinoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_IPDestinoActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -178,29 +201,32 @@ public class Login extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Login().setVisible(true);
+                new LoginScreen().setVisible(true);
             }
         });
-    }
+    }    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel IPDestLabel;
+    private javax.swing.JTextField IPDestino;
     private javax.swing.JButton LoginButton;
     private javax.swing.JTextField LoginDoUsuario;
     private javax.swing.JPasswordField SenhaDoUsuario;
     private javax.swing.JLabel avisoDeLogin;
+    private javax.swing.JCheckBox jCheckBoxIPLocal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables

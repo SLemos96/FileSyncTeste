@@ -5,6 +5,9 @@
  */
 package filesync.cliente;
 
+import filesync.controle.AutenticadorUsuario;
+import filesync.persistencia.BDArquivo;
+import filesync.persistencia.IBancoDados;
 import filesync.screens.MainScreen;
 
 /**
@@ -16,11 +19,28 @@ public class FileSyncCliente {
     /**
      * @param args the command line arguments
      */
-    Reply resposta;
-    Request requisicao;
+    private AutenticadorUsuario autenticador;
+    private IBancoDados bd;
+    private Reply resposta;
+    private Request requisicao;
+    
+    public FileSyncCliente() {
+        bd = new BDArquivo();
+        autenticador = new AutenticadorUsuario(bd);
+    }
 
+    public AutenticadorUsuario getAutenticador() {
+        return autenticador;
+    }
+
+    public IBancoDados getBd() {
+        return bd;
+    }
+    
+    
     public static void main(String[] args) {
         // TODO code application logic here
+        FileSyncCliente fsc = new FileSyncCliente();
         MainScreen tela = new MainScreen();
         tela.setVisible(true);
         
