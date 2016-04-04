@@ -3,24 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.cliente;
+package filesync.comunicao;
 
-import java.io.File;
+import java.io.*;
 
 /**
  *
  * @author Reinaldo
  */
-public class Request {
-
+public abstract class Request implements Serializable{
     
+    private Request requisicao;
     private boolean type; // tipo da requisição
     private File path;
     
-    public Request(boolean req_type, File caminho) {
-        this.type = req_type;
-        this.path = caminho;
-    }
+    public Request(Request requisicao) {
+        this.requisicao = requisicao;
+    } 
     
     
     
