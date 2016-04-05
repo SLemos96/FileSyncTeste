@@ -21,7 +21,7 @@ public class ServidorTCP {
     
     public ServidorTCP(int porta){
         try {
-            serverSocket = new ServerSocket(porta);            
+            serverSocket = new ServerSocket(porta);       
         } catch (BindException e) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, e);
         } catch (IOException ex) {
@@ -58,7 +58,7 @@ public class ServidorTCP {
         
     }
     
-    public void proverResponder(Reply resposta) {
+    public void proverResposta(Reply resposta) {
         
     }
     
