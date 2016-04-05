@@ -301,8 +301,8 @@ public class LoginScreen extends javax.swing.JFrame {
             if (fileSync.autenticarServidor(IPDestino.getText(), 
                     porta) ) {
                 new MainScreen().setVisible(true);
-                avisoDeLogin1.setText("Conexão estabelecida");
-                avisoDeLogin1.setVisible(true);
+                //avisoDeLogin1.setText("Conexão estabelecida");
+                //avisoDeLogin1.setVisible(true);
             } else {
                 avisoDeLogin.setText("Sevidor na " + porta+ " não encontrado");
             }
@@ -351,7 +351,7 @@ public class LoginScreen extends javax.swing.JFrame {
         
         if (fileSync.autenticarUsuario(login, senhaString)) {
             // Cria janela MainScreen
-            new MainScreen().setVisible(true);
+            //new MainScreen().setVisible(true);
             sucesso = true;
         } else {
             sucesso = false;
