@@ -9,6 +9,10 @@ import filesync.screens.*;
 import filesync.comunicao.Cliente;
 import filesync.comunicao.ServidorTCP;
 import filesync.persistencia.BDArquivo;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  * Inicializa as telas principais, o servidor e controla a comunicação entre
  * a interface grafica e o cliente.
@@ -23,7 +27,6 @@ public class FileSync {
     
     public FileSync() {
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
-        cliente = new Cliente();
     }
 
     public int getPortaPadrao() {
@@ -31,9 +34,20 @@ public class FileSync {
     }
         
     public void iniciar() {
-        servidor = new ServidorTCP(portaPadrao);
         new LoginScreen().setVisible(true);
-        servidor.aguardarConexao();        
+    }
+    
+    public void iniciarServidor() {
+        servidor = new ServidorTCP(portaPadrao);
+        servidor.aguardarConexao();
+    }
+    
+    public void iniciarServidor(int porta) {
+        servidor = new ServidorTCP(porta);
+    }
+    
+    public void iniciarCliente() {
+        cliente = new Cliente();
     }
     
     public boolean autenticarServidor(String serverName, int porta) {
@@ -45,7 +59,12 @@ public class FileSync {
     }            
     
     public static void main(String[] args) {
-        FileSync gui = new FileSync();
-        gui.iniciar();
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new FileSync().iniciar();
+            }
+        });
+
     }
 }

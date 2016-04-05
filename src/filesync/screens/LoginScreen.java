@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +33,13 @@ public class LoginScreen extends javax.swing.JFrame {
         
         String porta = new String(Integer.toString(fileSync.getPortaPadrao()));
         portaField.setText(porta);
+        jTextField2.setText(porta);
+        try {
+            // TODO add your handling code here:
+            jTextField1.setText(InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(LoginScreen.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -61,6 +70,7 @@ public class LoginScreen extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
         loginServidor = new javax.swing.JButton();
+        avisoDeLogin1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -121,7 +131,7 @@ public class LoginScreen extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 15, Short.MAX_VALUE)
                         .addComponent(avisoDeLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
@@ -144,8 +154,7 @@ public class LoginScreen extends javax.swing.JFrame {
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(IPDestino)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jCheckBoxIPLocal)
-                                        .addGap(48, 48, 48))
+                                        .addComponent(jCheckBoxIPLocal))
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(LoginButton)
@@ -184,6 +193,12 @@ public class LoginScreen extends javax.swing.JFrame {
 
         jLabel3.setText("IP_Servidor:");
 
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
+
         jLabel4.setText("Porta:");
 
         jTextField2.setToolTipText("");
@@ -194,6 +209,13 @@ public class LoginScreen extends javax.swing.JFrame {
         });
 
         loginServidor.setText("Login");
+        loginServidor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginServidorActionPerformed(evt);
+            }
+        });
+
+        avisoDeLogin1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -203,17 +225,21 @@ public class LoginScreen extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(70, 70, 70)
+                        .addComponent(loginServidor))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jLabel4)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(loginServidor)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(45, Short.MAX_VALUE))
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(15, Short.MAX_VALUE)
+                .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -228,7 +254,9 @@ public class LoginScreen extends javax.swing.JFrame {
                     .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(loginServidor)
-                .addContainerGap(102, Short.MAX_VALUE))
+                .addGap(36, 36, 36)
+                .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Servidor", jPanel2);
@@ -269,10 +297,12 @@ public class LoginScreen extends javax.swing.JFrame {
         
         if (verificarLogin()) {
             porta = Integer.parseInt(portaField.getText());
-            
+            fileSync.iniciarCliente();
             if (fileSync.autenticarServidor(IPDestino.getText(), 
                     porta) ) {
                 new MainScreen().setVisible(true);
+                avisoDeLogin1.setText("Conexão estabelecida");
+                avisoDeLogin1.setVisible(true);
             } else {
                 avisoDeLogin.setText("Sevidor na " + porta+ " não encontrado");
             }
@@ -304,6 +334,15 @@ public class LoginScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
 
+    private void loginServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginServidorActionPerformed
+        // TODO add your handling code here:
+        fileSync.iniciarServidor();
+    }//GEN-LAST:event_loginServidorActionPerformed
+
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+        
+    }//GEN-LAST:event_jTextField1ActionPerformed
+
     public boolean verificarLogin() {
         boolean sucesso;
         char[] senha = SenhaDoUsuario.getPassword();
@@ -320,40 +359,7 @@ public class LoginScreen extends javax.swing.JFrame {
         
         return sucesso;
     }
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainScreen.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new LoginScreen().setVisible(true);
-            }
-        });
-    }    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel IPDestLabel;
@@ -362,6 +368,7 @@ public class LoginScreen extends javax.swing.JFrame {
     private javax.swing.JTextField LoginDoUsuario;
     private javax.swing.JPasswordField SenhaDoUsuario;
     private javax.swing.JLabel avisoDeLogin;
+    private javax.swing.JLabel avisoDeLogin1;
     private javax.swing.JCheckBox jCheckBoxIPLocal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
