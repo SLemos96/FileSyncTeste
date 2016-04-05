@@ -303,6 +303,7 @@ public class LoginScreen extends javax.swing.JFrame {
                 new MainScreen().setVisible(true);
                 //avisoDeLogin1.setText("Conexão estabelecida");
                 //avisoDeLogin1.setVisible(true);
+                dispose();
             } else {
                 avisoDeLogin.setText("Sevidor na " + porta+ " não encontrado");
             }
