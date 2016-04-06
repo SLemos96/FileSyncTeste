@@ -5,38 +5,28 @@
  */
 package filesync.screens;
 
-import filesync.controle.AutenticadorUsuario;
 import filesync.controle.FileSync;
-import filesync.persistencia.BDArquivo;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author samue
  */
 public class LoginScreen extends javax.swing.JFrame {
-
+    
     private FileSync fileSync;
     /**
      * Creates new form LoginButton
      */
-    public LoginScreen() {
+    public LoginScreen(FileSync fileSync) {
         initComponents();
-        fileSync = new FileSync();
-        
-        String porta = new String(Integer.toString(fileSync.getPortaPadrao()));
-        portaField.setText(porta);
-        jTextField2.setText(porta);
+        this.fileSync = fileSync;
         try {
-            // TODO add your handling code here:
-            jTextField1.setText(InetAddress.getLocalHost().getHostAddress());
+            IPServidorField.setText(InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException ex) {
             Logger.getLogger(LoginScreen.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -53,7 +43,6 @@ public class LoginScreen extends javax.swing.JFrame {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
-        avisoDeLogin = new javax.swing.JLabel();
         LoginButton = new javax.swing.JButton();
         SenhaDoUsuario = new javax.swing.JPasswordField();
         IPDestino = new javax.swing.JTextField();
@@ -65,18 +54,17 @@ public class LoginScreen extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         LoginDoUsuario = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        loginServidor = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        IPServidorField = new javax.swing.JTextField();
+        iniciarServidorButton = new javax.swing.JButton();
         avisoDeLogin1 = new javax.swing.JLabel();
+        diretorioField = new javax.swing.JTextField();
+        butaoProcurar = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
-
-        avisoDeLogin.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         LoginButton.setText("Login");
         LoginButton.addActionListener(new java.awt.event.ActionListener() {
@@ -129,51 +117,42 @@ public class LoginScreen extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 15, Short.MAX_VALUE)
-                        .addComponent(avisoDeLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(portaLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(IPDestLabel))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(LoginButton)
+                            .addComponent(portaField, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jLabel1))
-                                .addGap(20, 20, 20)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(LoginDoUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
-                                    .addComponent(SenhaDoUsuario))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(portaLabel)
-                                    .addComponent(IPDestLabel))
-                                .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(IPDestino)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jCheckBoxIPLocal))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(LoginButton)
-                                            .addComponent(portaField, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(0, 0, Short.MAX_VALUE)))))))
-                .addContainerGap())
+                                .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCheckBoxIPLocal))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(LoginDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(245, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(8, 8, 8)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(LoginDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(IPDestLabel)
                     .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -182,40 +161,44 @@ public class LoginScreen extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(portaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portaLabel))
-                .addGap(16, 16, 16)
+                .addGap(23, 23, 23)
                 .addComponent(LoginButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(avisoDeLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Cliente", jPanel1);
 
-        jLabel3.setText("IP_Servidor:");
+        jLabel6.setText("IP_Servidor:");
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        IPServidorField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                IPServidorFieldActionPerformed(evt);
             }
         });
 
-        jLabel4.setText("Porta:");
-
-        jTextField2.setToolTipText("");
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        iniciarServidorButton.setText("Iniciar");
+        iniciarServidorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
-
-        loginServidor.setText("Login");
-        loginServidor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loginServidorActionPerformed(evt);
+                iniciarServidorButtonActionPerformed(evt);
             }
         });
 
         avisoDeLogin1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
+        diretorioField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                diretorioFieldActionPerformed(evt);
+            }
+        });
+
+        butaoProcurar.setText("Procurar");
+        butaoProcurar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                butaoProcurarActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setText("Diretório:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -225,38 +208,42 @@ public class LoginScreen extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(70, 70, 70)
-                        .addComponent(loginServidor))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4))
+                        .addComponent(jLabel6)
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(15, Short.MAX_VALUE)
-                .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(IPServidorField, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(diretorioField, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(butaoProcurar))
+                            .addComponent(iniciarServidorButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addGap(40, 40, 40)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(butaoProcurar)
+                    .addComponent(diretorioField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(loginServidor)
-                .addGap(36, 36, 36)
-                .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(78, 78, 78)
+                        .addComponent(avisoDeLogin1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(IPServidorField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(iniciarServidorButton)))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Servidor", jPanel2);
@@ -266,20 +253,17 @@ public class LoginScreen extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(88, Short.MAX_VALUE))
+                .addGap(23, 23, 23)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        jTabbedPane1.getAccessibleContext().setAccessibleName("");
-        jTabbedPane1.getAccessibleContext().setAccessibleDescription("");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -288,62 +272,69 @@ public class LoginScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_LoginDoUsuarioActionPerformed
 
-    private void SenhaDoUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SenhaDoUsuarioActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_SenhaDoUsuarioActionPerformed
-    
-    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        int porta;
-        
-        if (verificarLogin()) {
-            porta = Integer.parseInt(portaField.getText());
-            fileSync.iniciarCliente();
-            if (fileSync.autenticarServidor(IPDestino.getText(), 
-                    porta) ) {
-                new MainScreen().setVisible(true);
-                //avisoDeLogin1.setText("Conexão estabelecida");
-                //avisoDeLogin1.setVisible(true);
-                dispose();
-            } else {
-                avisoDeLogin.setText("Sevidor na " + porta+ " não encontrado");
-            }
-        }
-        else {
-            avisoDeLogin.setText("Usuário ou Senha incorreta!");
-        }
-        
-    }//GEN-LAST:event_LoginButtonActionPerformed
-
     private void jCheckBoxIPLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxIPLocalActionPerformed
         // TODO add your handling code here:
         if (jCheckBoxIPLocal.isSelected())
-            IPDestino.setText("localhost");
-        else 
-            IPDestino.setText("");
-        
+        IPDestino.setText("localhost");
+        else
+        IPDestino.setText("");
     }//GEN-LAST:event_jCheckBoxIPLocalActionPerformed
-
-    private void IPDestinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPDestinoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_IPDestinoActionPerformed
 
     private void portaFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portaFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_portaFieldActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void IPDestinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPDestinoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_IPDestinoActionPerformed
 
-    private void loginServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginServidorActionPerformed
+    private void SenhaDoUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SenhaDoUsuarioActionPerformed
         // TODO add your handling code here:
-        fileSync.iniciarServidor();
-    }//GEN-LAST:event_loginServidorActionPerformed
+    }//GEN-LAST:event_SenhaDoUsuarioActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         
-    }//GEN-LAST:event_jTextField1ActionPerformed
+        if (verificarLogin()) {
+            int porta;
+            porta = Integer.parseInt(portaField.getText());
+            if (fileSync.autenticarServidor(IPDestino.getText(),
+                porta) ) {
+            //avisoDeLogin1.setText("Conexão estabelecida");
+            //avisoDeLogin1.setVisible(true);
+                dispose();
+            }   else {
+                JOptionPane.showMessageDialog(null, "Sevidor na porta: " + porta + " não encontrado");
+            }   
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Usuário ou Senha incorreta!");
+        }
+    }//GEN-LAST:event_LoginButtonActionPerformed
 
+    private void iniciarServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_iniciarServidorButtonActionPerformed
+        // TODO add your handling code here:
+        String raiz = diretorioField.getText();
+        if (raiz.equals(""))
+            JOptionPane.showMessageDialog(null, "Um diretório deve ser especificado");
+        else {
+            fileSync.iniciarServidor(IPServidorField.getText(), raiz);
+            dispose();
+        }
+    }//GEN-LAST:event_iniciarServidorButtonActionPerformed
+
+    private void IPServidorFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPServidorFieldActionPerformed
+        
+    }//GEN-LAST:event_IPServidorFieldActionPerformed
+
+    private void diretorioFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_diretorioFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_diretorioFieldActionPerformed
+
+    private void butaoProcurarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butaoProcurarActionPerformed
+        // TODO add your handling code here:
+        diretorioField.setText(fileSync.escolherDiretorioServidor());
+    }//GEN-LAST:event_butaoProcurarActionPerformed
+    
     public boolean verificarLogin() {
         boolean sucesso;
         char[] senha = SenhaDoUsuario.getPassword();
@@ -365,22 +356,22 @@ public class LoginScreen extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel IPDestLabel;
     private javax.swing.JTextField IPDestino;
+    private javax.swing.JTextField IPServidorField;
     private javax.swing.JButton LoginButton;
     private javax.swing.JTextField LoginDoUsuario;
     private javax.swing.JPasswordField SenhaDoUsuario;
-    private javax.swing.JLabel avisoDeLogin;
     private javax.swing.JLabel avisoDeLogin1;
+    private javax.swing.JButton butaoProcurar;
+    private javax.swing.JTextField diretorioField;
+    private javax.swing.JButton iniciarServidorButton;
     private javax.swing.JCheckBox jCheckBoxIPLocal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JButton loginServidor;
     private javax.swing.JTextField portaField;
     private javax.swing.JLabel portaLabel;
     // End of variables declaration//GEN-END:variables

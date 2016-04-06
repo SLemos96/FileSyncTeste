@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.controle;
-
+package filesync.comunicao;
+import java.io.Serializable;
 /**
  *
  * @author Francisco
  */
-class ArvoreDiretorio {
-    
+public interface Parametro extends Serializable{
+    String tipoParametro();
+
 }

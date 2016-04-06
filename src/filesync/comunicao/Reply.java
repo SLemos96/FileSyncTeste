@@ -11,13 +11,30 @@ import java.io.*;
  *
  * @author Reinaldo
  */
-public abstract class Reply implements Serializable{
-    private Reply reply;
-    private byte [] resposta = new byte[52428800];
+public class Reply implements Serializable {
+    private byte[] bytes;
+    private TipoRequisicao resposta;
+    private Object objeto;
     
-    public Reply(byte[] arquivo, File caminho) {
-        this.resposta = arquivo;
-        
+    public Reply(byte[] bytes, TipoRequisicao resposta) {
+        this.bytes = bytes;
+        this.resposta = resposta;
     }
-       
-}
+    
+    public Reply(Object objeto, TipoRequisicao resposta) {
+        this.objeto = objeto;
+        this.resposta = resposta;
+    }
+    
+    public Object getObject() {
+        return objeto;
+    }
+            
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public TipoRequisicao getResposta() {
+        return resposta;
+    }    
+} 

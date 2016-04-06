@@ -17,7 +17,7 @@ public class EscolhaDiretorio {
     private JFileChooser fc;
     private Component dialogBox;
     private File diretorioOrigem;
-    private File diretorioDestino;
+   
     
     public EscolhaDiretorio() {
         fc = new JFileChooser();
@@ -41,9 +41,6 @@ public class EscolhaDiretorio {
         return diretorioOrigem;
     }
 
-    public File getDiretorioDestino() {
-        return diretorioDestino;
-    }
     public Component getDialogBox() {
         return dialogBox;
     }
@@ -57,10 +54,4 @@ public class EscolhaDiretorio {
         return fc.getSelectedFile();
     }
     
-    
-    public File escolherDiretorioRemoto() {
-        //TODO implementar
-        
-        return null;
-    }
 }

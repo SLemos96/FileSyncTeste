@@ -20,18 +20,22 @@ import java.util.logging.Logger;
  * Comente as classes e seus métodos... Podem ser comentários simplistas
  * @author Reinaldo
  */
-public class Cliente {
+public class Cliente extends Thread{
 
     /**
      * @param args the command line arguments
      */
+    private TipoRequisicao tipoRequisicao;
     private Reply resposta;
     private Request requisicao;
     private Socket cliente;
-    
+    private MainScreen telaPrincipal;
     
     public Cliente() {
-
+        telaPrincipal = new MainScreen();
+    }
+    
+    public void run() {
     }
     
     /**
@@ -75,10 +79,57 @@ public class Cliente {
         }
     }
     
-    public static void main(String[] args) {
-        // TODO code application logic here
+    public void enviarRequisicao(Request requisicao) {
+        try {
+            OutputStream saidaParaServidor = cliente.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
+            oos.writeObject(requisicao);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        MainScreen tela = new MainScreen();
-        tela.setVisible(true);        
+    }
+    
+    public void receberResposta() {
+        try {
+            InputStream respostaServidor = cliente.getInputStream();
+            ObjectInputStream ois = new ObjectInputStream(respostaServidor);
+            Reply resposta = (Reply) ois.readObject();
+            
+            ArvoreDeArquivos arvoreDeArquivos = (ArvoreDeArquivos) resposta.getObject();
+            telaPrincipal.setRemoteTextArea(arvoreDeArquivos.listaDeArquivos());
+            telaPrincipal.setPastaRemotaField(arvoreDeArquivos.getRaiz().toString());
+            
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void analisarRequisicao(Request requisicao, Parametro parametro) {
+        
+    }
+    
+    public void proverResposta(Reply resposta) {
+        
+    }
+    
+    public byte[] serializarObjeto(Request requisicao) {
+        try {
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        ObjectOutputStream ous;
+        ous = new ObjectOutputStream(bao);
+        ous.writeObject(requisicao);
+        return bao.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public void mostrarTelaPrincipal() {
+        telaPrincipal.setVisible(true);
     }
 }

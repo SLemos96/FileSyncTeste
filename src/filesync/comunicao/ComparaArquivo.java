@@ -3,15 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.controle;
+package filesync.comunicao;
+
 
 import java.io.File;
-
+import filesync.comunicao.Parametro;
+import filesync.comunicao.*;
 /**
  *
  * @author janioxavier
  */
-public class ComparaArquivo {
+public class ComparaArquivo implements Parametro{
     public ComparaArquivo() {
         
     }
@@ -19,7 +21,7 @@ public class ComparaArquivo {
     /**
      * @return true se os diretórios são iguais, false caso contrario.
      */
-    public boolean compararDiretorios(ArvoreDiretorio arvoreDir1, ArvoreDiretorio arvoreDir2) {
+    public boolean compararDiretorios(ArvoreDeArquivos arvoreDir1, ArvoreDeArquivos arvoreDir2) {
         return true;
     }
     
@@ -37,6 +39,11 @@ public class ComparaArquivo {
      */
     public boolean compararArquivoPorNome(File arquivo1, File arquivo2) {
         return true;
+    }
+
+    @Override
+    public String tipoParametro() {
+        return "comparar arquivos";
     }
     
 }

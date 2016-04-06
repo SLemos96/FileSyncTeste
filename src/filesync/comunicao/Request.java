@@ -13,12 +13,27 @@ import java.io.*;
  */
 public class Request implements Serializable{
     
-    private Request requisicao;
+    private TipoRequisicao requisicao;
     private Parametro parametro;
-    private File path;
     
-    public Request(Request requisicao) {
+    public Request(TipoRequisicao requisicao, Parametro parametro1) {
         this.requisicao = requisicao;
-    } 
-           
+        this.parametro = parametro1;
+    }
+
+    public TipoRequisicao getRequisicao() {
+        return requisicao;
+    }
+
+    public void setRequisicao(TipoRequisicao requisicao) {
+        this.requisicao = requisicao;
+    }
+
+    public Parametro getParametro() {
+        return parametro;
+    }
+
+    public void setParametro(Parametro parametro) {
+        this.parametro = parametro;
+    }                   
 }
