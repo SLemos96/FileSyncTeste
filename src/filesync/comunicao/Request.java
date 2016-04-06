@@ -11,16 +11,14 @@ import java.io.*;
  *
  * @author Reinaldo
  */
-public abstract class Request implements Serializable{
+public class Request implements Serializable{
     
     private Request requisicao;
-    private boolean type; // tipo da requisição
+    private Parametro parametro;
     private File path;
     
     public Request(Request requisicao) {
         this.requisicao = requisicao;
     } 
-    
-    
-    
+           
 }
