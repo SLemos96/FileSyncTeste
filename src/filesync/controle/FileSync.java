@@ -6,13 +6,10 @@
 package filesync.controle;
 
 import filesync.screens.*;
-import filesync.comunicao.Cliente;
-import filesync.comunicao.ServidorTCP;
+import filesync.comunicao.*;
 import filesync.persistencia.BDArquivo;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.File;
+
 /**
  * Inicializa as telas principais, o servidor e controla a comunicação entre
  * a interface grafica e o cliente.
@@ -24,9 +21,16 @@ public class FileSync {
     private ServidorTCP servidor;
     private Cliente cliente;
     private AutenticadorUsuario autenticador;
+    private EscolhaDiretorio chooseDiretorio;
+    private ArvoreDeArquivos arvoreDeArquivos;
+    private MainScreen telaPrincipal;
     
     public FileSync() {
+        telaPrincipal = new MainScreen();
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
+        chooseDiretorio = new EscolhaDiretorio();
+        servidor = new ServidorTCP(telaPrincipal);
+        cliente = new Cliente();        
     }
 
     public int getPortaPadrao() {
@@ -34,29 +38,45 @@ public class FileSync {
     }
         
     public void iniciar() {
-        new LoginScreen().setVisible(true);
+        servidor.start();
+        new LoginScreen(this).setVisible(true);
+        
     }
     
-    public void iniciarServidor() {
-        servidor = new ServidorTCP(portaPadrao);
-        servidor.aguardarConexao();
+    public int getPorta() {
+        return servidor.getPorta();
     }
-    
-    public void iniciarServidor(int porta) {
-        servidor = new ServidorTCP(porta);
-    }
-    
-    public void iniciarCliente() {
-        cliente = new Cliente();
-    }
+        
     
     public boolean autenticarServidor(String serverName, int porta) {
-        return cliente.conectarServidor(serverName, porta);
+        boolean sucesso = cliente.conectarServidor(serverName, porta);
+        if (sucesso) {            
+            Request requisicao;
+            requisicao = new Request(TipoRequisicao.ExibirArquivos, arvoreDeArquivos);
+            cliente.enviarRequisicao(requisicao);
+            servidor.receberRequisicao();
+        } 
+        return sucesso;
     }
     
     public boolean autenticarUsuario(String user, String senha) {
-        return autenticador.autenticarUsuario(user, senha);
+        boolean sucesso = autenticador.autenticarUsuario(user, senha);
+        if (sucesso) {
+            telaPrincipal.setPastaLocalField(arvoreDeArquivos.getRaiz().toString());
+            telaPrincipal.setLocalTextArea(arvoreDeArquivos.listaDeArquivos());
+            telaPrincipal.setVisible(true);
+        } else {
+            sucesso = false;
+        }
+        return sucesso;
     }            
+    
+    
+    public String escolherDiretorio() {
+        File raiz = chooseDiretorio.escolherDiretorio();
+        arvoreDeArquivos = new ArvoreDeArquivos(raiz);
+        return raiz.toString();
+    }
     
     public static void main(String[] args) {
         /* Create and display the form */
