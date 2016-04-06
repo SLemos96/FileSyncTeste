@@ -23,13 +23,11 @@ public class FileSync {
     private AutenticadorUsuario autenticador;
     private EscolhaDiretorio chooseDiretorio;
     private ArvoreDeArquivos arvoreDeArquivos;
-    private MainScreen telaPrincipal;
+    private ServerScreen telaServidor;
     
-    public FileSync() {
-        telaPrincipal = new MainScreen();
+    public FileSync() {                
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
-        chooseDiretorio = new EscolhaDiretorio();
-        servidor = new ServidorTCP(telaPrincipal);
+        chooseDiretorio = new EscolhaDiretorio();        
         cliente = new Cliente();        
     }
 
@@ -38,41 +36,51 @@ public class FileSync {
     }
         
     public void iniciar() {
+        new LoginScreen(this).setVisible(true);        
+    }
+    
+    public void iniciarServidor(String ServerName, String pastaRaiz) {
+        telaServidor = new ServerScreen();
+        servidor = new ServidorTCP(telaServidor, pastaRaiz);        
         servidor.start();
-        new LoginScreen(this).setVisible(true);
-        
     }
     
     public int getPorta() {
         return servidor.getPorta();
     }
-        
-    
+            
     public boolean autenticarServidor(String serverName, int porta) {
         boolean sucesso = cliente.conectarServidor(serverName, porta);
-        if (sucesso) {            
-            Request requisicao;
-            requisicao = new Request(TipoRequisicao.ExibirArquivos, arvoreDeArquivos);
-            cliente.enviarRequisicao(requisicao);
-            servidor.receberRequisicao();
+        if (sucesso) {
+            cliente.mostrarTelaPrincipal();
+            exibirArquivosRemotos();
         } 
         return sucesso;
     }
     
+    public void exibirArquivosRemotos() {
+        Request requisicao;
+        requisicao = new Request(TipoRequisicao.ExibirArquivos, null);
+        cliente.enviarRequisicao(requisicao);
+        
+        cliente.receberResposta();
+    }
+    
     public boolean autenticarUsuario(String user, String senha) {
-        boolean sucesso = autenticador.autenticarUsuario(user, senha);
-        if (sucesso) {
-            telaPrincipal.setPastaLocalField(arvoreDeArquivos.getRaiz().toString());
-            telaPrincipal.setLocalTextArea(arvoreDeArquivos.listaDeArquivos());
-            telaPrincipal.setVisible(true);
-        } else {
-            sucesso = false;
-        }
+        boolean sucesso = autenticador.autenticarUsuario(user, senha);        
         return sucesso;
-    }            
+    }
+    
+    public void exibirDiretorio() {
+        
+    }
     
     
     public String escolherDiretorio() {
+        return "";
+    }
+    
+    public String escolherDiretorioServidor() {
         File raiz = chooseDiretorio.escolherDiretorio();
         arvoreDeArquivos = new ArvoreDeArquivos(raiz);
         return raiz.toString();
