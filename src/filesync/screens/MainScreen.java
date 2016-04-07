@@ -6,13 +6,20 @@
 package filesync.screens;
 
 import filesync.comunicao.ArvoreDeArquivos;
+import filesync.comunicao.Cliente;
 import filesync.comunicao.Parametro;
 import java.io.File;
 import javax.swing.JFileChooser;
 import filesync.controle.EscolhaDiretorio;
 import filesync.controle.AutenticadorUsuario;
 import filesync.controle.FileSync;
+import filesync.persistencia.ArquivoDestino;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -23,15 +30,16 @@ public class MainScreen extends javax.swing.JFrame {
 
     /**
      * Creates new form MainScreen
-     */
-    private String pathOrigem;
-    private String pathDestino;
-    private ArvoreDeArquivos arvoreDeArquivos;
+     */    
+    private ArvoreDeArquivos arvoreDeArquivosLocal; 
+    private ArvoreDeArquivos arvoreDeArquivosRemota;
     private EscolhaDiretorio chooseDiretorio;
+    private List<ArquivoDestino> arquivosDiferentes;
     
     public MainScreen() {
         initComponents();
         chooseDiretorio = new EscolhaDiretorio();
+        arquivosDiferentes = new ArrayList<ArquivoDestino>();
     }
 
     public void setPastaLocalField(String texto) {
@@ -49,6 +57,84 @@ public class MainScreen extends javax.swing.JFrame {
     public void setRemoteTextArea(String texto) {
         remoteTextArea.setText(texto);
     }
+
+    public ArvoreDeArquivos getArvoreDeArquivosLocal() {
+        return arvoreDeArquivosLocal;
+    }
+    
+    public File getRaizLocal() {
+        return arvoreDeArquivosLocal.getRaiz();
+    }
+    
+    /*
+    public void formatarAreaDeTexto(ArvoreDeArquivos arvore, boolean isAreaRemota) {     
+        try {
+            arvoreDeArquivosRemota = arvore.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(MainScreen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String[] lines = arvore.listaDeArquivos().split("\n");
+        String text = "";
+        int cont = 0;
+        
+        for (String line : lines) {
+            if (cont == 0)
+                cont++;
+            else {
+                text += line ;
+            }
+        }
+        
+        if (isAreaRemota) {
+            pastaRemotaField.setText(lines[0]);
+            remoteTextArea.setText(text);            
+        } else {
+            pastaLocalField.setText(lines[0]);
+            localTextArea.setText(text);
+        }
+    }*/
+    
+    public void formatarAreaDeTexto(ArvoreDeArquivos arvore, boolean isAreaRemota) {     
+        try {
+            arvoreDeArquivosRemota = arvore.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(MainScreen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        String[] lines;
+        String text = "";
+        int cont = 0;
+        
+        File raiz = arvore.getRaiz();
+        ArrayList<File> filhos;
+        LinkedList<File> fila = new LinkedList<>();
+        fila.push(raiz);
+        
+        while(!fila.isEmpty()) {
+            raiz = fila.pollFirst();
+            text += raiz.getName();
+            filhos = arvore.getFilhos(raiz);
+            
+            for (File filho : filhos) {
+                if (arvore.isDiretorio(filho))
+                    fila.push(filho);
+                else
+                    text += "\n" + filho.getName();
+            }                
+            
+            text += "\n    ";
+            
+        }
+                
+        if (isAreaRemota) {
+            pastaRemotaField.setText(raiz.getPath());
+            remoteTextArea.setText(text);            
+        } else {
+            pastaLocalField.setText(raiz.getPath());                        
+            localTextArea.setText(text);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -71,7 +157,7 @@ public class MainScreen extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         localTextArea = new javax.swing.JTextArea();
         jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        jButtonComparar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -195,10 +281,10 @@ public class MainScreen extends javax.swing.JFrame {
             }
         });
 
-        jButton5.setText("Comparar");
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
+        jButtonComparar.setText("Comparar");
+        jButtonComparar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
+                jButtonCompararActionPerformed(evt);
             }
         });
 
@@ -221,7 +307,7 @@ public class MainScreen extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonComparar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -236,7 +322,7 @@ public class MainScreen extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton4)
-                    .addComponent(jButton5))
+                    .addComponent(jButtonComparar))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -250,17 +336,21 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        String temp = pathOrigem;
-        pathOrigem = pathDestino;
-        pathDestino = temp;
         
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+    private void jButtonCompararActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCompararActionPerformed
         // TODO add your handling code here:
-        estaConectado();
+        if (estaConectado()) {
+            if (pastaLocalField.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
+            } else {
+                compararArvoresDeArquivos();
+                JOptionPane.showMessageDialog(null, listarArquivosDiferentes());
+            }
+        }
             
-    }//GEN-LAST:event_jButton5ActionPerformed
+    }//GEN-LAST:event_jButtonCompararActionPerformed
 
     private void pastaRemotaFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pastaRemotaFieldActionPerformed
         // TODO add your handling code here:
@@ -269,6 +359,14 @@ public class MainScreen extends javax.swing.JFrame {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
         estaConectado();
+        if (pastaLocalField.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
+        } else {
+            Cliente c = Cliente.getInstance();
+            c.sincronizarArquivos();
+            
+        }
+        
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void procurarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarButtonActionPerformed
@@ -279,16 +377,28 @@ public class MainScreen extends javax.swing.JFrame {
     
     public String escolherDiretorio() {
         File raiz = chooseDiretorio.escolherDiretorio();
-        arvoreDeArquivos = new ArvoreDeArquivos(raiz);
+        arvoreDeArquivosLocal = new ArvoreDeArquivos(raiz);
         return raiz.toString();    
     }
     
     public void exibirDiretorio() {
-        if (arvoreDeArquivos != null) {
-            setPastaLocalField(arvoreDeArquivos.getRaiz().toString());
-            setLocalTextArea(arvoreDeArquivos.listaDeArquivos());
-            setVisible(true);
+        if (arvoreDeArquivosLocal != null) {
+            setPastaLocalField(arvoreDeArquivosLocal.getRaiz().toString());
+            formatarAreaDeTexto(arvoreDeArquivosLocal, false);
         }
+    }
+    
+    public String listarArquivosDiferentes() {
+        String text = "";
+        
+        for (ArquivoDestino arquivoDestino : arquivosDiferentes) {
+            if (arquivoDestino.isToServer())
+                text += arquivoDestino.getFile().getName() + " >>> " ;
+            else
+                text += " <<< " + arquivoDestino.getFile().getName();
+            text += "\n";
+        }
+        return text;
     }
     
     public boolean estaConectado() {
@@ -301,11 +411,133 @@ public class MainScreen extends javax.swing.JFrame {
         }
         return sucesso;
     }
+    
+    /**
+     * 
+     * @return uma lista com os arquivos destino. Arquivos destino são
+     * os arquivos que serão sincronizados na pasta do servidor ou do cliente,
+     * e eles possuem nomes diferentes, caso sejam iguais o mais antigo será
+     * sincronizado.
+     */
+    private void compararArvoresDeArquivos() {
+        
+        File raizLocal = arvoreDeArquivosLocal.getRaiz();
+        File raizRemota = arvoreDeArquivosRemota.getRaiz();
+        
+        //1- filhos da arvore local e remota       
+        LinkedList<File> filhosLocal = arquivosFilhos(arvoreDeArquivosLocal);
+        LinkedList<File> filhosRemoto = arquivosFilhos(arvoreDeArquivosRemota);        
+        
+        compararArquivos(filhosLocal, filhosRemoto, true);
+        compararArquivos(filhosRemoto, filhosLocal, false);
+        
+        /*2- comparacação dos filhos
+        while(!filhosLocal.isEmpty()) {
+            File filhoLocal = filhosLocal.pollLast();
+            filhosRemoto = arquivosFilhos(arvoreDeArquivosRemota);
+            compararArquivos(filhoLocal, filhosRemoto, true);
+        }
+        
+        filhosRemoto = arquivosFilhos(arvoreDeArquivosRemota);
+        while(!filhosRemoto.isEmpty()) {
+            File filhoRemoto = filhosRemoto.pollLast();
+            filhosLocal = arquivosFilhos(arvoreDeArquivosLocal);
+            compararArquivos(filhoRemoto, filhosLocal, false);
+        } */           
+    }
+    
+    private void compararArquivos(LinkedList<File> arquivos1, LinkedList<File> arquivos2, boolean toServer) {
+        while (!arquivos1.isEmpty()) {
+                File arquivo1 = arquivos1.pollLast();
+                File arquivo2 = buscarArquivoPorNome(arquivo1, arquivos2);
+                if (arquivo2 == null) {                    
+                    arquivosDiferentes.add(new ArquivoDestino(arquivo1, toServer));
+                }
+                else {
+                    switch (arquivoMaisRecente(arquivo1, arquivo2)) {
+                        case 1:
+                            arquivosDiferentes.add(new ArquivoDestino(arquivo1, false));
+                            break;
+                        case -1:
+                            arquivosDiferentes.add(new ArquivoDestino(arquivo2, true));
+                            break;
+                    }
+                }
+        }
+    }
+
+    private File buscarArquivoPorNome(File arquivo, LinkedList<File> arquivos) {
+        File fileName = null;
+        while (!arquivos.isEmpty()) {
+            fileName = arquivos.pollLast();
+            if (fileName.getName().equals(arquivo.getName()))
+                return fileName;
+        }
+        return null;
+    }
+    
+    private boolean mesmoArquivo(File filhoLocal, File filhoRemoto) {
+        if (mesmoCaminho(filhoLocal, filhoRemoto))
+            return true;
+        else 
+            return false;
+    }
+    
+    private boolean mesmoCaminho(File filhoLocal, File filhoRemoto) {
+        String raizLocal = pastaLocalField.getText();
+        String raizRemota = pastaRemotaField.getText();
+        
+        String filhoLocalString = filhoLocal.getName();
+        String filhoRemotoString = filhoRemoto.getName();
+        
+        
+        return ((filhoLocalString.compareTo(filhoRemotoString)) == 0);
+        
+    }
+    
+    public LinkedList<File> arquivosFilhos(ArvoreDeArquivos arvore) {
+        LinkedList<File> arquivosFilhos = new LinkedList<>();
+        File raiz = arvore.getRaiz();
+        ArrayList<File> filhos;
+        LinkedList<File> pilha = new LinkedList<>();
+        pilha.push(raiz);
+        
+        while(!pilha.isEmpty()) {
+            raiz = pilha.pollLast();
+            arquivosFilhos.push(raiz);
+            filhos = arvore.getFilhos(raiz);
+            
+            for (File filho : filhos) {
+                if (arvore.isDiretorio(filho))
+                    pilha.push(filho);
+                else
+                    arquivosFilhos.push(raiz);
+            }                                                
+        }
+        return arquivosFilhos;
+    }
+    
+    private int arquivoMaisRecente(File file1, File file2) {
+        if (file1.lastModified() > file2.lastModified())
+            return 1;
+        else if (file1.lastModified() < file2.lastModified())
+            return -1;
+        else
+            return 0;
+    }
+    
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new MainScreen().setVisible(true);
+            }
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButtonComparar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
@@ -321,5 +553,6 @@ public class MainScreen extends javax.swing.JFrame {
     private javax.swing.JButton procurarButton;
     private javax.swing.JTextArea remoteTextArea;
     // End of variables declaration//GEN-END:variables
+    
 
 }

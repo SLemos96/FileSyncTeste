@@ -28,7 +28,7 @@ public class FileSync {
     public FileSync() {                
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
         chooseDiretorio = new EscolhaDiretorio();        
-        cliente = new Cliente();        
+        cliente = Cliente.getInstance();        
     }
 
     public int getPortaPadrao() {

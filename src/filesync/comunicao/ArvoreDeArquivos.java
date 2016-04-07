@@ -12,12 +12,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Armazena uma arvore de arquivos
  * @author Francisco
  */
-public class ArvoreDeArquivos implements Serializable, Parametro{
+public class ArvoreDeArquivos implements Serializable, Parametro, Cloneable{
     private final Tree<File> arvoreDeArquivos;
     private File raiz;
     
@@ -66,19 +68,19 @@ public class ArvoreDeArquivos implements Serializable, Parametro{
         } else {
             arvoreDeArquivos.addLeaf(raiz.getParentFile(), raiz);
         }
-    }
-    
-    public boolean contemArquivo(File arquivo) {
+    }        
         
-        return true;
+    public boolean isDiretorio(File diretorio) {
+        return arvoreDeArquivos.containsElement(diretorio);
     }
     
-    public boolean contemDiretorio(File diretorio) {
-        return true;
+    public ArrayList<File> getFilhos(File arquivo) {
+        return new ArrayList<>(arvoreDeArquivos.getSuccessors(arquivo));
     }
+    
     
     public File getArquivo(File arquivo) {
-        return null;
+        return arvoreDeArquivos.getTree(arquivo).getHead();
     }
     
     public void limparArvore() {
@@ -101,5 +103,11 @@ public class ArvoreDeArquivos implements Serializable, Parametro{
     @Override
     public String tipoParametro() {
         return "arvore de arquivos";
+    }
+    
+    @Override
+    public ArvoreDeArquivos clone() throws CloneNotSupportedException {        
+        return (ArvoreDeArquivos) super.clone();
+        
     }
 }

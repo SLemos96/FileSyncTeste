@@ -13,6 +13,7 @@ import filesync.controle.AutenticadorUsuario;
 import filesync.persistencia.BDArquivo;
 import filesync.persistencia.IBancoDados;
 import filesync.screens.MainScreen;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,11 +30,26 @@ public class Cliente extends Thread{
     private Reply resposta;
     private Request requisicao;
     private Socket cliente;
-    private MainScreen telaPrincipal;
+    private MainScreen telaPrincipal = new MainScreen();
+    private ArvoreDeArquivos arvoreDeArquivosRemota;
+    private static Cliente instance;
     
-    public Cliente() {
-        telaPrincipal = new MainScreen();
+    private Cliente() {                
     }
+    
+    public static Cliente getInstance() {
+        if (instance == null) {
+            inicializaInstancia();
+        }
+        return instance;
+    }
+    
+    private static synchronized void inicializaInstancia() {
+        if (instance == null) {
+            instance = new Cliente();
+        }
+    }
+    
     
     public void run() {
     }
@@ -97,15 +113,29 @@ public class Cliente extends Thread{
             ObjectInputStream ois = new ObjectInputStream(respostaServidor);
             Reply resposta = (Reply) ois.readObject();
             
-            ArvoreDeArquivos arvoreDeArquivos = (ArvoreDeArquivos) resposta.getObject();
-            telaPrincipal.setRemoteTextArea(arvoreDeArquivos.listaDeArquivos());
-            telaPrincipal.setPastaRemotaField(arvoreDeArquivos.getRaiz().toString());
+            analisarResposta(resposta);
+            
             
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }    
+    
+    public void analisarResposta(Reply resposta) {
+        
+        TipoRequisicao tipo = resposta.getResposta();
+        
+        if (TipoRequisicao.Download == tipo) {
+            System.out.println("d");
+        } else if (TipoRequisicao.ExibirArquivos == tipo) {
+            exibirArquivosParaCliente((ArvoreDeArquivos) resposta.getObject());
+        } else if (TipoRequisicao.ObterListaArquivo == tipo) {
+            System.out.println("o");
+        } else if (TipoRequisicao.Upload == tipo) {
+            System.out.println("u");
+        }   
     }
     
     public void analisarRequisicao(Request requisicao, Parametro parametro) {
@@ -131,5 +161,41 @@ public class Cliente extends Thread{
     
     public void mostrarTelaPrincipal() {
         telaPrincipal.setVisible(true);
+    }
+
+    private void exibirArquivosParaCliente(ArvoreDeArquivos arvoreDeArquivos) {
+        try {
+            arvoreDeArquivosRemota = arvoreDeArquivos.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        telaPrincipal.formatarAreaDeTexto(arvoreDeArquivos, true);
+    }
+
+    public void sincronizarArquivos() {
+        File diretorioDestino = telaPrincipal.getRaizLocal();
+        
+        LinkedList<File> arquivos = telaPrincipal.arquivosFilhos(arvoreDeArquivosRemota);
+        
+        
+        while(!arquivos.isEmpty()) {
+            File arquivo = arquivos.pollLast();
+            
+            File novoArquivo = new File(diretorioDestino, arquivo.getName());
+            
+            /*
+            if(!diretorioDestino.exists()) {
+                diretorioDestino.mkdir();
+            }
+            arquivo.renameTo(new File(diretorioDestino, arquivo.getName()));*/
+            /* CRIAR ARQUIVO COM ESTE NOME*/
+            System.out.println(novoArquivo);
+            try {
+                arquivo.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
     }
 }

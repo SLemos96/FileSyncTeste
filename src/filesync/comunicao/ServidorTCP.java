@@ -56,7 +56,7 @@ public class ServidorTCP extends Thread{
     }
     public void run() {
         aguardarConexao();
-        while(true) {
+        while(server.isConnected()) {
             receberRequisicao();
         }
         
@@ -112,11 +112,12 @@ public class ServidorTCP extends Thread{
     
     public void analisarRequisicao(Request requisicao) {
         mensagemServidor += "analisando requisicao...\n";
+        escreverLog();
         TipoRequisicao tipo = requisicao.getRequisicao();
         if (TipoRequisicao.Download == tipo) {
             System.out.println("d");
         } else if (TipoRequisicao.ExibirArquivos == tipo) {
-            exibirArquivosParaCliente();
+            enviarArvoreDeArquivosParaCliente();
         } else if (TipoRequisicao.ObterListaArquivo == tipo) {
             System.out.println("o");
         } else if (TipoRequisicao.Upload == tipo) {
@@ -124,11 +125,11 @@ public class ServidorTCP extends Thread{
         }        
     }
     
-    public void exibirArquivosParaCliente() {
+    public void enviarArvoreDeArquivosParaCliente() {
         mensagemServidor += "cliente requer lista de arquivos no servidor\n";
         escreverLog();
         
-        Reply resposta = new Reply(arvoreDeArquivos, TipoRequisicao.ObterListaArquivo);
+        Reply resposta = new Reply(arvoreDeArquivos, TipoRequisicao.ExibirArquivos);
         proverResposta(resposta);
     }
     
