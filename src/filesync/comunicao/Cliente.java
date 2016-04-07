@@ -12,6 +12,7 @@ import filesync.comunicao.Reply;
 import filesync.controle.AutenticadorUsuario;
 import filesync.persistencia.BDArquivo;
 import filesync.persistencia.IBancoDados;
+import filesync.persistencia.Usuario;
 import filesync.screens.MainScreen;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -23,9 +24,8 @@ import java.util.logging.Logger;
  */
 public class Cliente extends Thread{
 
-    /**
-     * @param args the command line arguments
-     */
+
+    private boolean conectadoServidor;
     private TipoRequisicao tipoRequisicao;
     private Reply resposta;
     private Request requisicao;
@@ -58,20 +58,25 @@ public class Cliente extends Thread{
      * 
      * @return true se a comunicação foi realizada, false caso contrario
      */
-    public boolean conectarServidor(String serverName, int porta) {
-        boolean sucesso = false;
+    public boolean conectarServidor(Usuario user, String serverName, int porta) {
+        Request requisicao;       
+        
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
         try {
             cliente = new Socket(serverName, porta);
+            
+            requisicao = new Request(TipoRequisicao.Autenticacao, user);            
+            enviarRequisicao(requisicao);
+            receberResposta();
+            
             System.out.println("Conectado a " +
                 cliente.getRemoteSocketAddress());
-            sucesso = true;
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-            sucesso = false;
+            conectadoServidor = false;
         } finally {
-            return sucesso;
+            return conectadoServidor;
         }
     }
     
@@ -100,7 +105,7 @@ public class Cliente extends Thread{
             OutputStream saidaParaServidor = cliente.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
             oos.writeObject(requisicao);
-            
+
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -109,13 +114,11 @@ public class Cliente extends Thread{
     
     public void receberResposta() {
         try {
-            //InputStream respostaServidor = 
-            ObjectInputStream ois = (ObjectInputStream) cliente.getInputStream();
+            InputStream respostaServidor = cliente.getInputStream();
+            ObjectInputStream ois = new ObjectInputStream(respostaServidor);
             Reply resposta = (Reply) ois.readObject();
             
-            analisarResposta(resposta);
-            
-            
+            analisarResposta(resposta);                        
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -135,7 +138,9 @@ public class Cliente extends Thread{
             System.out.println("o");
         } else if (TipoRequisicao.Upload == tipo) {
             System.out.println("u");
-        }   
+        } else if (TipoRequisicao.Autenticacao == tipo) {
+            conectadoServidor =  resposta.isSucesso();
+        }
     }
     
     public void analisarRequisicao(Request requisicao, Parametro parametro) {
@@ -197,5 +202,9 @@ public class Cliente extends Thread{
             }
         }
         
+    }
+
+    private ObjectInputStream ObjectInputStream(InputStream respostaServidor) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

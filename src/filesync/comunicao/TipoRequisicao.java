@@ -13,10 +13,12 @@ import java.io.Serializable;
  */
 public enum TipoRequisicao implements Serializable{
     
+    Autenticacao("autenticando usuario"),
     Download("download"),
     Upload("upload"),
     ObterListaArquivo("obterDiretorio"),
     ExibirArquivos("listar");
+    
     
         
     private final String descricao;

@@ -5,7 +5,11 @@
  */
 package filesync.comunicao;
 
+import filesync.controle.AutenticadorUsuario;
+import filesync.persistencia.BDArquivo;
+import filesync.persistencia.DadosLogin;
 import filesync.persistencia.Log;
+import filesync.persistencia.Usuario;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -22,6 +26,7 @@ import java.util.logging.Logger;
  */
 public class Conexao extends Thread{
     
+    private AutenticadorUsuario autenticador;
     private ArvoreDeArquivos arvoreArquivos;
     private Log logDoServidor;
     private ObjectInputStream entra;
@@ -29,6 +34,7 @@ public class Conexao extends Thread{
     Socket cliente;
     
     public Conexao(Socket socket, Log logDoServidor, ArvoreDeArquivos arvoreArquivos) {
+        this.autenticador = new AutenticadorUsuario(new BDArquivo());
         this.cliente = socket;
         this.logDoServidor = logDoServidor;
         this.arvoreArquivos = arvoreArquivos;
@@ -69,17 +75,49 @@ public class Conexao extends Thread{
             System.out.println("o");
         } else if (TipoRequisicao.Upload == tipo) {
             System.out.println("u");
-        }        
+        } else if (TipoRequisicao.Autenticacao == tipo) {
+            verificarAutenticacao((Usuario) requisicao.getParametro());
+            
+        }
     }
     
     public void enviarArvoreDeArquivosParaCliente() {        
         logDoServidor.escreverLog("cliente requer lista de arquivos no servidor\n");
         
         Reply resposta = new Reply(arvoreArquivos, TipoRequisicao.ExibirArquivos);
-        proverResposta(resposta);
+        enviarResposta(resposta);
+    }    
+    
+    public void verificarAutenticacao(Usuario usuario) {
+        boolean sucesso;
+        String senha;
+        String nomeUsuario;
+        
+        nomeUsuario = usuario.getDadosLogin().getSenha();        
+        senha = usuario.getDadosLogin().getSenha();
+        
+        logDoServidor.escreverLogLine("autenticando usuario: " + nomeUsuario);
+        
+        if (sucesso = autenticador.autenticarUsuario(nomeUsuario, senha))
+            logDoServidor.escreverLogLine(nomeUsuario + " esta conectado");
+        else
+            logDoServidor.escreverLogLine(nomeUsuario + " não está conectado");
+        
+        Reply resposta = new Reply(sucesso, TipoRequisicao.Autenticacao);
+        enviarResposta(resposta);
     }
     
-    public byte[] serializarObjeto(Object requisicao) {
+    
+    public void enviarResposta(Reply resposta) {
+        try {
+            sai.writeObject(resposta);
+ 
+        } catch (IOException ex) {
+            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+        public byte[] serializarObjeto(Object requisicao) {
         try {
            ByteArrayOutputStream bao = new ByteArrayOutputStream();
             ObjectOutputStream ous;
@@ -90,15 +128,5 @@ public class Conexao extends Thread{
             e.printStackTrace();
         }
         return null;
-    }
-    
-    public void proverResposta(Reply resposta) {
-        try {
-            DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
-            ObjectOutputStream oos = new ObjectOutputStream(out);
-            oos.writeObject(resposta);            
-        } catch (IOException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

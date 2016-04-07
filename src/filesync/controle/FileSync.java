@@ -8,6 +8,7 @@ package filesync.controle;
 import filesync.screens.*;
 import filesync.comunicao.*;
 import filesync.persistencia.BDArquivo;
+import filesync.persistencia.Usuario;
 import java.io.File;
 
 /**
@@ -49,8 +50,8 @@ public class FileSync {
         return servidor.getPorta();
     }
             
-    public boolean autenticarServidor(String serverName, int porta) {
-        boolean sucesso = cliente.conectarServidor(serverName, porta);
+    public boolean autenticarServidor(Usuario user, String serverName, int porta) {
+        boolean sucesso = cliente.conectarServidor(user, serverName, porta);
         if (sucesso) {
             cliente.mostrarTelaPrincipal();
             exibirArquivosRemotos();

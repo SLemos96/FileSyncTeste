@@ -15,6 +15,7 @@ public class Reply implements Serializable {
     private byte[] bytes;
     private TipoRequisicao resposta;
     private Object objeto;
+    private boolean sucesso;
     
     public Reply(byte[] bytes, TipoRequisicao resposta) {
         this.bytes = bytes;
@@ -23,6 +24,11 @@ public class Reply implements Serializable {
     
     public Reply(Object objeto, TipoRequisicao resposta) {
         this.objeto = objeto;
+        this.resposta = resposta;
+    }
+    
+    public Reply(boolean sucesso, TipoRequisicao resposta) {
+        this.sucesso = sucesso;
         this.resposta = resposta;
     }
     
@@ -37,4 +43,8 @@ public class Reply implements Serializable {
     public TipoRequisicao getResposta() {
         return resposta;
     }    
+
+    public boolean isSucesso() {
+        return sucesso;
+    }        
 } 

@@ -6,11 +6,14 @@
 package filesync.screens;
 
 import filesync.controle.FileSync;
+import filesync.persistencia.DadosLogin;
+import filesync.persistencia.Usuario;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 
 /**
  *
@@ -24,8 +27,8 @@ public class LoginScreen extends javax.swing.JFrame {
      */
     public LoginScreen(FileSync fileSync) {
         initComponents();
-        LoginDoUsuario.setText("admin");
-        SenhaDoUsuario.setText("admin");
+        jFieldUsuario.setText("admin");
+        jFieldSenha.setText("admin");
         this.fileSync = fileSync;        
         try {
             IPServidorField.setText(InetAddress.getLocalHost().getHostAddress());
@@ -48,7 +51,7 @@ public class LoginScreen extends javax.swing.JFrame {
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         LoginButton = new javax.swing.JButton();
-        SenhaDoUsuario = new javax.swing.JPasswordField();
+        jFieldSenha = new javax.swing.JPasswordField();
         IPDestino = new javax.swing.JTextField();
         portaField = new javax.swing.JTextField();
         IPDestLabel = new javax.swing.JLabel();
@@ -56,7 +59,7 @@ public class LoginScreen extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         portaLabel = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        LoginDoUsuario = new javax.swing.JTextField();
+        jFieldUsuario = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         IPServidorField = new javax.swing.JTextField();
@@ -77,9 +80,9 @@ public class LoginScreen extends javax.swing.JFrame {
             }
         });
 
-        SenhaDoUsuario.addActionListener(new java.awt.event.ActionListener() {
+        jFieldSenha.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SenhaDoUsuarioActionPerformed(evt);
+                jFieldSenhaActionPerformed(evt);
             }
         });
 
@@ -112,9 +115,9 @@ public class LoginScreen extends javax.swing.JFrame {
 
         jLabel2.setText("Senha:");
 
-        LoginDoUsuario.addActionListener(new java.awt.event.ActionListener() {
+        jFieldUsuario.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LoginDoUsuarioActionPerformed(evt);
+                jFieldUsuarioActionPerformed(evt);
             }
         });
 
@@ -136,8 +139,8 @@ public class LoginScreen extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(LoginDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jFieldUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jFieldSenha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jCheckBoxIPLocal))))
                     .addComponent(jLabel2)
@@ -149,11 +152,11 @@ public class LoginScreen extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(8, 8, 8)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(LoginDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFieldUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(SenhaDoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFieldSenha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -268,9 +271,9 @@ public class LoginScreen extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void LoginDoUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginDoUsuarioActionPerformed
+    private void jFieldUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldUsuarioActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_LoginDoUsuarioActionPerformed
+    }//GEN-LAST:event_jFieldUsuarioActionPerformed
 
     private void jCheckBoxIPLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxIPLocalActionPerformed
         // TODO add your handling code here:
@@ -288,16 +291,18 @@ public class LoginScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_IPDestinoActionPerformed
 
-    private void SenhaDoUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SenhaDoUsuarioActionPerformed
+    private void jFieldSenhaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldSenhaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_SenhaDoUsuarioActionPerformed
+    }//GEN-LAST:event_jFieldSenhaActionPerformed
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         
         if (verificarLogin()) {
             int porta;
             porta = Integer.parseInt(portaField.getText());
-            if (fileSync.autenticarServidor(IPDestino.getText(),
+            Usuario usuario;
+            usuario = new Usuario(new DadosLogin(jFieldUsuario.getText(), obterSenha(jFieldSenha)));
+            if (fileSync.autenticarServidor(usuario, IPDestino.getText(),
                 porta) ) {
             //avisoDeLogin1.setText("Conexão estabelecida");
             //avisoDeLogin1.setVisible(true);
@@ -338,9 +343,9 @@ public class LoginScreen extends javax.swing.JFrame {
     
     public boolean verificarLogin() {
         boolean sucesso;
-        char[] senha = SenhaDoUsuario.getPassword();
-        String senhaString = new String(senha);
-        String login = LoginDoUsuario.getText();
+        
+        String senhaString = obterSenha(jFieldSenha);
+        String login = jFieldUsuario.getText();
         
         if (fileSync.autenticarUsuario(login, senhaString)) {
             // Cria janela MainScreen
@@ -353,19 +358,23 @@ public class LoginScreen extends javax.swing.JFrame {
         return sucesso;
     }
 
+    private String obterSenha(JPasswordField campoSenha) {
+        char[] senha = campoSenha.getPassword();
+        return new String(senha);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel IPDestLabel;
     private javax.swing.JTextField IPDestino;
     private javax.swing.JTextField IPServidorField;
     private javax.swing.JButton LoginButton;
-    private javax.swing.JTextField LoginDoUsuario;
-    private javax.swing.JPasswordField SenhaDoUsuario;
     private javax.swing.JLabel avisoDeLogin1;
     private javax.swing.JButton butaoProcurar;
     private javax.swing.JTextField diretorioField;
     private javax.swing.JButton iniciarServidorButton;
     private javax.swing.JCheckBox jCheckBoxIPLocal;
+    private javax.swing.JPasswordField jFieldSenha;
+    private javax.swing.JTextField jFieldUsuario;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;

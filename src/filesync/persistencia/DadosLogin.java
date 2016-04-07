@@ -5,13 +5,14 @@
  */
 package filesync.persistencia;
 
+import filesync.comunicao.Parametro;
 import java.io.Serializable;
 
 /**
  *
  * @author Francisco
  */
-public class DadosLogin implements Serializable {
+public class DadosLogin implements Serializable, Parametro{
     
     private final String nomeDeUsuario;
     private final String senha;
@@ -23,6 +24,15 @@ public class DadosLogin implements Serializable {
 
     public String getSenha() {
         return senha;
+    }
+    
+    public String getNomeDeUsuario() {
+        return nomeDeUsuario;
+    }
+    
+    @Override
+    public String tipoParametro() {
+        return "dados de login";
     }
     
     
