@@ -32,6 +32,8 @@ public class Cliente extends Thread{
     private Socket cliente;
     private MainScreen telaPrincipal = new MainScreen();
     private ArvoreDeArquivos arvoreDeArquivosRemota;
+    private String serverName;
+    private int porta;
     private static Cliente instance;
     
     private Cliente() {                
@@ -60,24 +62,19 @@ public class Cliente extends Thread{
      */
     public boolean conectarServidor(Usuario user, String serverName, int porta) {
         Request requisicao;       
-        
+        this.serverName = serverName;
+        this.porta = porta;
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
-        try {
-            cliente = new Socket(serverName, porta);
             
-            requisicao = new Request(TipoRequisicao.Autenticacao, user);            
-            enviarRequisicao(requisicao);
-            receberResposta();
+        requisicao = new Request(TipoRequisicao.Autenticacao, user);            
+        enviarRequisicao(requisicao);
+        receberResposta();
             
-            System.out.println("Conectado a " +
-                cliente.getRemoteSocketAddress());
-        } catch (IOException ex) {
-            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-            conectadoServidor = false;
-        } finally {
-            return conectadoServidor;
-        }
+        System.out.println("Conectado a " +
+            cliente.getRemoteSocketAddress());
+        
+        return conectadoServidor;        
     }
     
     public boolean encerrarConexao() {
@@ -102,6 +99,7 @@ public class Cliente extends Thread{
     
     public void enviarRequisicao(Request requisicao) {
         try {
+            cliente = new Socket(serverName, porta);
             OutputStream saidaParaServidor = cliente.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
             oos.writeObject(requisicao);

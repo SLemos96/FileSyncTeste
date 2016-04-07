@@ -14,17 +14,18 @@ import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTextPane;
-
+import java.util.HashMap;
 /**
- * Aguarda uma conexão, recebe objetos e envia objetos.
+ * Aguarda uma conexão, recebe objetos e envia objetos, armazena arvore de diretorios
  * @author Francisco
  */
 public class ServidorTCP extends Thread{
+    private String diretorioRaiz;
     private Log logDoServidor;
     private ServerSocket serverSocket;
     private Socket cliente;
     private Request requisicao;
-    private ArvoreDeArquivos arvoreDeArquivos;
+    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;
     
     public ServidorTCP(int porta){
         try {
@@ -39,10 +40,12 @@ public class ServidorTCP extends Thread{
     
     public ServidorTCP(JTextPane logTextPane, String pastaRaiz)  {
         try {
-            this.arvoreDeArquivos = new ArvoreDeArquivos(new File(pastaRaiz));            
+            this.diretorioRaiz = pastaRaiz;
+            this.diretorioDosUsuarios = new HashMap<String, ArvoreDeArquivos>();            
             serverSocket = new ServerSocket(0);
             logDoServidor = new Log(logTextPane,"Servidor: " + InetAddress.getLocalHost().getHostAddress() + "\n"
                     + "criando diretório em: " + pastaRaiz + "\n");
+            new File(pastaRaiz).mkdir();
             logTextPane.setText(logDoServidor.getLog());
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,16 +77,13 @@ public class ServidorTCP extends Thread{
             cliente = serverSocket.accept();
             escreverLog("Conexão estabelecida com " +
                 cliente.getRemoteSocketAddress());
-            new Conexao(cliente, logDoServidor, arvoreDeArquivos).start();
-            
+            Thread conexao = new Conexao(cliente, logDoServidor, diretorioDosUsuarios, diretorioRaiz);
+            conexao.start();
+            conexao.join();                                    
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }                
-    }
-    
-    
-
-    public void setArvoreDeArquivos(ArvoreDeArquivos arvoreDeArquivos) {
-        this.arvoreDeArquivos = arvoreDeArquivos;
-    }
+    }    
 }

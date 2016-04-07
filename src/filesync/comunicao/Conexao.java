@@ -13,10 +13,12 @@ import filesync.persistencia.Usuario;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,18 +28,21 @@ import java.util.logging.Logger;
  */
 public class Conexao extends Thread{
     
+    private String pastaRaiz;
     private AutenticadorUsuario autenticador;
-    private ArvoreDeArquivos arvoreArquivos;
+    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;
     private Log logDoServidor;
     private ObjectInputStream entra;
     private ObjectOutputStream sai;
     Socket cliente;
     
-    public Conexao(Socket socket, Log logDoServidor, ArvoreDeArquivos arvoreArquivos) {
+    public Conexao(Socket socket, Log logDoServidor,
+            HashMap<String,ArvoreDeArquivos> arvoreArquivos, String pastaRaiz) {
+        this.pastaRaiz = pastaRaiz;
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
         this.cliente = socket;
         this.logDoServidor = logDoServidor;
-        this.arvoreArquivos = arvoreArquivos;
+        this.diretorioDosUsuarios = arvoreArquivos;
         
         try {
             entra = new ObjectInputStream(cliente.getInputStream());
@@ -49,11 +54,18 @@ public class Conexao extends Thread{
     
     public void run() {
         receberRequisicao();
+        try {
+            encerrar();
+        } catch (IOException ex) {
+            Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void receberRequisicao() {
         try {                        
-            Request requisicao = (Request) entra.readObject();
+            logDoServidor.escreverLogLine("Recebendo requisicao...");
+            
+            Request requisicao = (Request) entra.readObject();            
             analisarRequisicao(requisicao);
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
@@ -64,27 +76,39 @@ public class Conexao extends Thread{
         }
     }
     
+    public void encerrar() throws IOException {
+        entra.close();
+        sai.close();
+    }
+    
     public void analisarRequisicao(Request requisicao) {        
+        TipoRequisicao tipo;
         
-        TipoRequisicao tipo = requisicao.getRequisicao();
+        tipo = requisicao.getRequisicao();
+        
+        logDoServidor.escreverLogLine("o cliente requer " + tipo.getDescricao());
+        
         if (TipoRequisicao.Download == tipo) {
             System.out.println("d");
         } else if (TipoRequisicao.ExibirArquivos == tipo) {
-            enviarArvoreDeArquivosParaCliente();
+            enviarDiretorioCliente((Usuario) requisicao.getParametro());
         } else if (TipoRequisicao.ObterListaArquivo == tipo) {
             System.out.println("o");
         } else if (TipoRequisicao.Upload == tipo) {
             System.out.println("u");
         } else if (TipoRequisicao.Autenticacao == tipo) {
-            verificarAutenticacao((Usuario) requisicao.getParametro());
-            
+            verificarAutenticacao((Usuario) requisicao.getParametro());            
         }
     }
     
-    public void enviarArvoreDeArquivosParaCliente() {        
-        logDoServidor.escreverLog("cliente requer lista de arquivos no servidor\n");
+    public void enviarDiretorioCliente(Usuario usuario) {        
+        logDoServidor.escreverLog("cliente requer os seus diretorios\n");        
+        Reply resposta;
         
-        Reply resposta = new Reply(arvoreArquivos, TipoRequisicao.ExibirArquivos);
+        String usuarioNome = usuario.getDadosLogin().getNomeDeUsuario();
+        
+        ArvoreDeArquivos arvore = diretorioDosUsuarios.get(usuarioNome);
+        resposta = new Reply(arvore, TipoRequisicao.ExibirArquivos);
         enviarResposta(resposta);
     }    
     
@@ -93,13 +117,18 @@ public class Conexao extends Thread{
         String senha;
         String nomeUsuario;
         
-        nomeUsuario = usuario.getDadosLogin().getSenha();        
+        nomeUsuario = usuario.getDadosLogin().getNomeDeUsuario();        
         senha = usuario.getDadosLogin().getSenha();
         
         logDoServidor.escreverLogLine("autenticando usuario: " + nomeUsuario);
         
-        if (sucesso = autenticador.autenticarUsuario(nomeUsuario, senha))
+        if (sucesso = autenticador.autenticarUsuario(nomeUsuario, senha)) {
             logDoServidor.escreverLogLine(nomeUsuario + " esta conectado");
+            File raizUsuario = new File(pastaRaiz + File.separator + nomeUsuario);
+            logDoServidor.escreverLogLine("criando diretorio de " + raizUsuario.getAbsolutePath());
+            raizUsuario.mkdir();
+            diretorioDosUsuarios.put(nomeUsuario, new ArvoreDeArquivos(raizUsuario));
+        }
         else
             logDoServidor.escreverLogLine(nomeUsuario + " não está conectado");
         
@@ -110,14 +139,16 @@ public class Conexao extends Thread{
     
     public void enviarResposta(Reply resposta) {
         try {
+            logDoServidor.escreverLogLine("servidor enviando resposta para " 
+                    + resposta.getResposta().getDescricao());            
             sai.writeObject(resposta);
- 
+            sai.flush();
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-        public byte[] serializarObjeto(Object requisicao) {
+    public byte[] serializarObjeto(Object requisicao) {
         try {
            ByteArrayOutputStream bao = new ByteArrayOutputStream();
             ObjectOutputStream ous;

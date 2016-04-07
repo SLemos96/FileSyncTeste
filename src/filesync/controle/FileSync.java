@@ -50,18 +50,18 @@ public class FileSync {
         return servidor.getPorta();
     }
             
-    public boolean autenticarServidor(Usuario user, String serverName, int porta) {
-        boolean sucesso = cliente.conectarServidor(user, serverName, porta);
+    public boolean autenticarServidor(Usuario usuario, String serverName, int porta) {
+        boolean sucesso = cliente.conectarServidor(usuario, serverName, porta);
         if (sucesso) {
             cliente.mostrarTelaPrincipal();
-            exibirArquivosRemotos();
+            exibirArquivosRemotos(usuario);
         } 
         return sucesso;
     }
     
-    public void exibirArquivosRemotos() {
+    public void exibirArquivosRemotos(Usuario usuario) {
         Request requisicao;
-        requisicao = new Request(TipoRequisicao.ExibirArquivos, null);
+        requisicao = new Request(TipoRequisicao.ExibirArquivos, usuario);
         cliente.enviarRequisicao(requisicao);
         
         cliente.receberResposta();
