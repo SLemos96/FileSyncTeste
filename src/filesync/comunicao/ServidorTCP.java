@@ -6,24 +6,25 @@
 package filesync.comunicao;
 import filesync.comunicao.Request;
 import filesync.comunicao.Reply;
+import filesync.persistencia.Log;
 import filesync.screens.MainScreen;
 import filesync.screens.ServerScreen;
 import java.net.*;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JTextPane;
 
 /**
  * Aguarda uma conexão, recebe objetos e envia objetos.
  * @author Francisco
  */
 public class ServidorTCP extends Thread{
-    private String mensagemServidor;
+    private Log logDoServidor;
     private ServerSocket serverSocket;
-    private Socket server;
+    private Socket cliente;
     private Request requisicao;
     private ArvoreDeArquivos arvoreDeArquivos;
-    private ServerScreen telaServidor;
     
     public ServidorTCP(int porta){
         try {
@@ -36,41 +37,28 @@ public class ServidorTCP extends Thread{
     }
 
     
-    public ServidorTCP(ServerScreen telaServidor, String pastaRaiz)  {
+    public ServidorTCP(JTextPane logTextPane, String pastaRaiz)  {
         try {
-            this.arvoreDeArquivos = new ArvoreDeArquivos(new File(pastaRaiz));
-            this.telaServidor = telaServidor;
-            this.telaServidor.setTitle("Log do servidor");
-            this.telaServidor.setVisible(true);
+            this.arvoreDeArquivos = new ArvoreDeArquivos(new File(pastaRaiz));            
             serverSocket = new ServerSocket(0);
-            mensagemServidor = "Servidor: " + serverSocket.getInetAddress().getLocalHost().getHostAddress() + "\n";
-            escreverLog();
-            
+            logDoServidor = new Log(logTextPane,"Servidor: " + InetAddress.getLocalHost().getHostAddress() + "\n"
+                    + "criando diretório em: " + pastaRaiz + "\n");
+            logTextPane.setText(logDoServidor.getLog());
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void escreverLog() {
-        telaServidor.setLogTextPane(mensagemServidor);
+    public void escreverLog(String mensagem) {
+        logDoServidor.escreverLogLine(mensagem);        
     }
+    
     public void run() {
-        aguardarConexao();
-        while(server.isConnected()) {
-            receberRequisicao();
-        }
-        
+        while (true) {
+            aguardarConexao();
+        }                
     }
 
-    public String getMensagemServidor() {
-        return mensagemServidor;
-    }
-
-    public void setMensagemServidor(String mensagemServidor) {
-        this.mensagemServidor = mensagemServidor;
-    }    
-    
-    
     public ServerSocket getServerSocket() {
         return serverSocket;
     }
@@ -79,82 +67,21 @@ public class ServidorTCP extends Thread{
         return serverSocket.getLocalPort();
     }
     
-    public void aguardarConexao() {
-        mensagemServidor += "Esperando cliente na porta: " +
-                serverSocket.getLocalPort() + "\n";
-        escreverLog();
+    public void aguardarConexao() {        
+        escreverLog("Esperando cliente na porta: " +
+                serverSocket.getLocalPort());
         try {
-            server = serverSocket.accept();
-        } catch (IOException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        mensagemServidor += "Conexão estabelecida com " +
-                server.getRemoteSocketAddress() + "\n";
-        escreverLog();
-    }
-    
-    public void receberRequisicao() {
-        try {
-            mensagemServidor += "Recebendo requisicao...\n";
-            escreverLog();
-            DataInputStream dis = new DataInputStream(server.getInputStream());
-            ObjectInputStream oos = new ObjectInputStream(dis);
-            Request requisicao = (Request) oos.readObject();
-            analisarRequisicao(requisicao);
-        } catch (IOException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception e) {
+            cliente = serverSocket.accept();
+            escreverLog("Conexão estabelecida com " +
+                cliente.getRemoteSocketAddress());
+            new Conexao(cliente, logDoServidor, arvoreDeArquivos).start();
             
-        }
-    }
-    
-    public void analisarRequisicao(Request requisicao) {
-        mensagemServidor += "analisando requisicao...\n";
-        escreverLog();
-        TipoRequisicao tipo = requisicao.getRequisicao();
-        if (TipoRequisicao.Download == tipo) {
-            System.out.println("d");
-        } else if (TipoRequisicao.ExibirArquivos == tipo) {
-            enviarArvoreDeArquivosParaCliente();
-        } else if (TipoRequisicao.ObterListaArquivo == tipo) {
-            System.out.println("o");
-        } else if (TipoRequisicao.Upload == tipo) {
-            System.out.println("u");
-        }        
-    }
-    
-    public void enviarArvoreDeArquivosParaCliente() {
-        mensagemServidor += "cliente requer lista de arquivos no servidor\n";
-        escreverLog();
-        
-        Reply resposta = new Reply(arvoreDeArquivos, TipoRequisicao.ExibirArquivos);
-        proverResposta(resposta);
-    }
-    
-    public byte[] serializarObjeto(Object requisicao) {
-        try {
-           ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            ObjectOutputStream ous;
-            ous = new ObjectOutputStream(bao);
-            ous.writeObject(requisicao);
-            return bao.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    public void proverResposta(Reply resposta) {
-        try {
-            DataOutputStream out = new DataOutputStream(server.getOutputStream());
-            ObjectOutputStream oos = new ObjectOutputStream(out);
-            oos.writeObject(resposta);            
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }                
     }
+    
+    
 
     public void setArvoreDeArquivos(ArvoreDeArquivos arvoreDeArquivos) {
         this.arvoreDeArquivos = arvoreDeArquivos;

@@ -5,11 +5,15 @@
  */
 package filesync.persistencia;
 
+import java.io.File;
+import java.io.Serializable;
+
 /**
  *
  * @author Francisco
  */
-public class Usuario {
+public class Usuario implements Serializable{
     private DadosLogin dadosLogin;
+    private File filePath;
     
 }

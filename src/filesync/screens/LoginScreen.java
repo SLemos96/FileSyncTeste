@@ -26,12 +26,14 @@ public class LoginScreen extends javax.swing.JFrame {
         initComponents();
         LoginDoUsuario.setText("admin");
         SenhaDoUsuario.setText("admin");
-        this.fileSync = fileSync;
+        this.fileSync = fileSync;        
         try {
             IPServidorField.setText(InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException ex) {
             Logger.getLogger(LoginScreen.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        diretorioField.setText(System.getProperty("user.home")+"\\FileSyncRemote");
     }
 
     /**
@@ -199,7 +201,7 @@ public class LoginScreen extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setText("Diretório:");
+        jLabel4.setText("Diretório_raiz:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -316,6 +318,7 @@ public class LoginScreen extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Um diretório deve ser especificado");
         else {
             fileSync.iniciarServidor(IPServidorField.getText(), raiz);
+            new ServerScreen(IPServidorField.getText(), raiz).setVisible(true);            
             dispose();
         }
     }//GEN-LAST:event_iniciarServidorButtonActionPerformed

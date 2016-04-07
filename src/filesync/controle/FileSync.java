@@ -40,9 +40,9 @@ public class FileSync {
     }
     
     public void iniciarServidor(String ServerName, String pastaRaiz) {
-        telaServidor = new ServerScreen();
+        /*telaServidor = new ServerScreen();
         servidor = new ServidorTCP(telaServidor, pastaRaiz);        
-        servidor.start();
+        servidor.start();*/
     }
     
     public int getPorta() {

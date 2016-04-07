@@ -5,6 +5,8 @@
  */
 package filesync.screens;
 
+import filesync.comunicao.ServidorTCP;
+
 /**
  *
  * @author Francisco
@@ -14,8 +16,12 @@ public class ServerScreen extends javax.swing.JFrame {
     /**
      * Creates new form ServerScreen
      */
-    public ServerScreen() {
-        initComponents();
+    public ServerScreen(String ip, String raiz) {
+        initComponents();        
+        this.setTitle("Log do servidor");
+        this.setVisible(true);
+        new ServidorTCP(logTextPane, raiz).start();
+        
     }
 
     /**

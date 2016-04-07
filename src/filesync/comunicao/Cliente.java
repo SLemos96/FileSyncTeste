@@ -109,8 +109,8 @@ public class Cliente extends Thread{
     
     public void receberResposta() {
         try {
-            InputStream respostaServidor = cliente.getInputStream();
-            ObjectInputStream ois = new ObjectInputStream(respostaServidor);
+            //InputStream respostaServidor = 
+            ObjectInputStream ois = (ObjectInputStream) cliente.getInputStream();
             Reply resposta = (Reply) ois.readObject();
             
             analisarResposta(resposta);
