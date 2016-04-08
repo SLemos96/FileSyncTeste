@@ -20,8 +20,7 @@ public class ServerScreen extends javax.swing.JFrame {
         initComponents();        
         this.setTitle("Log do servidor");
         this.setVisible(true);
-        new ServidorTCP(logTextPane, raiz).start();
-        
+        new ServidorTCP(raiz, ip,logTextPane).start();        
     }
 
     /**

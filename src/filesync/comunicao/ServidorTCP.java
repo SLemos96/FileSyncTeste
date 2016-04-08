@@ -20,6 +20,7 @@ import java.util.HashMap;
  * @author Francisco
  */
 public class ServidorTCP extends Thread{
+    private String ipServer;
     private String diretorioRaiz;
     private Log logDoServidor;
     private ServerSocket serverSocket;
@@ -38,12 +39,13 @@ public class ServidorTCP extends Thread{
     }
 
     
-    public ServidorTCP(JTextPane logTextPane, String pastaRaiz)  {
+    public ServidorTCP(String ipServer, String pastaRaiz, JTextPane logTextPane)  {
         try {
+            this.ipServer = ipServer;
             this.diretorioRaiz = pastaRaiz;
             this.diretorioDosUsuarios = new HashMap<String, ArvoreDeArquivos>();            
             serverSocket = new ServerSocket(0);
-            logDoServidor = new Log(logTextPane,"Servidor: " + InetAddress.getLocalHost().getHostAddress() + "\n"
+            logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n"
                     + "criando diretório em: " + pastaRaiz + "\n");
             new File(pastaRaiz).mkdir();
             logTextPane.setText(logDoServidor.getLog());
