@@ -13,33 +13,67 @@ import java.io.File;
  */
 public class Arquivo implements Parametro{
     private File arquivo;
+    private String caminhoDoArquivo;
+    private String nomeDoDestino;
+    private String nomeDoArquivo;
+    private long tamanho;
+    private long ultimaAlteracao;
     private byte[] data;
     
     public Arquivo(File arquivo) {
         this.arquivo = arquivo;
+        this.nomeDoArquivo = arquivo.getName();
+        this.caminhoDoArquivo = arquivo.getAbsolutePath();
+        this.tamanho = arquivo.length();
+        this.ultimaAlteracao = arquivo.lastModified();
     }
     
-    public Arquivo(String nome) {
-        this.arquivo = new File(nome);
+    public Arquivo(String nomeDoDestino) {
+        this.nomeDoDestino = nomeDoDestino;
     }
+
+    public String getNomeDoArquivo() {
+        return nomeDoArquivo;
+    }
+
+    public void setNomeDoArquivo(String nomeDoArquivo) {
+        this.nomeDoArquivo = nomeDoArquivo;
+    }
+    
 
     public byte[] getData() {
         return data;
     }
-    
-    
-    
+
+    public String getNomeDoDestino() {
+        return nomeDoDestino;
+    }
+
+    public void setNomeDoDestino(String nomeDoDestino) {
+        this.nomeDoDestino = nomeDoDestino;
+    }
+            
     public File getArquivo() {
         return arquivo;
     }
     
-    public String getNomeArquivo() {
-        return arquivo.getAbsolutePath();
-    }
-
     public void setData(byte[] data) {
         this.data = data;
     }
+
+    public String getCaminhoDoArquivo() {
+        return caminhoDoArquivo;
+    }
+
+    public long getTamanho() {
+        return tamanho;
+    }
+
+    public long getUltimaAlteracao() {
+        return ultimaAlteracao;
+    }
+    
+    
     
     @Override
     public String toString() {

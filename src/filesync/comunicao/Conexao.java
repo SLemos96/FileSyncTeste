@@ -17,6 +17,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -85,7 +86,7 @@ public class Conexao extends Thread{
         sai.close();
     }
     
-    public void analisarRequisicao(Request requisicao) {        
+    public void analisarRequisicao(Request requisicao) throws FileNotFoundException, IOException {        
         TipoRequisicao tipo;
         
         tipo = requisicao.getRequisicao();
@@ -218,47 +219,62 @@ public class Conexao extends Thread{
         }        
     }
     
-    private void realizarDownload(Arquivo arquivo) {
-        int size;
-        int eof;
-        byte[] data;
+    private void realizarDownload(Arquivo arquivo) throws FileNotFoundException, IOException {        
         File novoArquivo;
+        byte[] data;
         FileOutputStream fos;
         
-        novoArquivo = new File(System.getProperty("user.home") + arquivo.getNomeArquivo());        
-        data = arquivo.getData();
+        String caminhoDoArquivo = arquivo.getNomeDoDestino() + System.getProperty("file.separator") +
+                arquivo;
+       
+        novoArquivo = new File(caminhoDoArquivo);        
+                
+        if (!novoArquivo.exists()) {
+            novoArquivo.createNewFile();
+        }                        
         
+        fos = new FileOutputStream(novoArquivo);        
+        
+        data = arquivo.getData();        
+        logDoServidor.escreverLogLine("realizando download do arquivo: " + arquivo.getNomeDoArquivo());
         try {
-            logDoServidor.escreverLogLine("realizando download do arquivo: " + arquivo.getNomeArquivo());
-            fos = new FileOutputStream(novoArquivo);
-            fos.write(data);
-            fos.flush();
+            
+            fos.write(data);                        
             resposta = new Reply(true);
             enviarResposta();
-            
-        } catch (IOException ex) {
+        } catch (FileNotFoundException ex) {
             Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {            
+            logDoServidor.escreverLogLine("Erro na abertura do arquivo");
+        } finally {
+            try {
+                if (fos != null)
+                    fos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
     private void realizarUpload(Arquivo arquivoRequerido) {
+        int size;
         FileInputStream fis;
-        byte[] data;
-        
+        byte[] data;        
                 
         try {
             logDoServidor.escreverLogLine("realizando upload do arquivo: " + arquivoRequerido);
             fis = new FileInputStream(arquivoRequerido.getArquivo());
+            size = fis.available();
+            data = new byte[size];
             
-            data = new byte[buffer_size];
-            
-            while(fis.read(data) != -1);
+            if (size > 0)
+                while(fis.read(data) != -1);
                         
             resposta = new Reply(data);            
             enviarResposta();
             
         } catch (IOException ex) {
-            Logger.getLogger(Conexao.class.getName()).log(Level.SEVERE, null, ex);
+            logDoServidor.escreverLogLine("Erro na abertura ou fechamento do arquivo");
         }
     }
 }

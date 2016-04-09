@@ -31,7 +31,7 @@ public class Cliente {
     private final String usuariosRemotos = "usuários_remotos";
     private final String caminhoRaizCliente = System.getProperty("user.home") + fs + raizCliente;
     private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos + fs;
-    private int buffer_size;
+    private int buffer_size = 1048576;  // 2 megabytes
     private boolean conectadoServidor;
     private TipoRequisicao tipoRequisicao;
     private Reply resposta;
@@ -123,38 +123,40 @@ public class Cliente {
             OutputStream saidaParaServidor = cliente.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
             oos.writeObject(requisicao);
-            
+            oos.flush();
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }                    
     }
     
-    public boolean realizarUpload(String destino, Arquivo arquivoLocal) throws FileNotFoundException, IOException {
-        File arquivo;
-        byte[] data;
+    public boolean realizarUpload(Arquivo arquivoLocal) {        
         int size;
-        FileInputStream fis;
+        byte[] data;
+        FileInputStream fis;                                
         
-        data = new byte[buffer_size];
-        arquivo = new File(destino);
-        fis = new FileInputStream(arquivo);
-        
-        fis = new FileInputStream(arquivo);
-        size = fis.available();
-        data = new byte[size];
-        while(fis.read(data) != -1);
-        arquivoLocal.setData(data);
-        fis.close();
-        
-        requisicao = new Request(TipoRequisicao.Upload, arquivoLocal);
-        
-        enviarRequisicao();
+        try {
+            fis = new FileInputStream(arquivoLocal.getArquivo());
+            size = fis.available();            
+            data = new byte[fis.available()];
+            
+            if (size > 0)
+                while(fis.read(data) != -1);
+            
+            arquivoLocal.setData(data);
+            
+            requisicao = new Request(TipoRequisicao.Upload, arquivoLocal);        
+            enviarRequisicao();                                
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {                                
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }                
         receberResposta();                
         
         return resposta.getSucesso();
     }
     
-    public void realizarDownload(String destinoLocal, Arquivo arquivoRemoto) {
+    public void realizarDownload(Arquivo arquivoRemoto) {
         File arquivoLocal;
         byte[] data;                
          
@@ -162,7 +164,7 @@ public class Cliente {
         enviarRequisicao();
         receberResposta();
                 
-        arquivoLocal = new File(destinoLocal + fs + arquivoRemoto);
+        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino() + fs + arquivoRemoto);
         
         data = resposta.getBytes();
         
@@ -343,6 +345,7 @@ public class Cliente {
         File local;
         String nomeDoArquivoDeDownload;
         Arquivo arquivoDeDownload;
+        String nomeDoArquivoDeUpload;
         int porta = ServerScreen.porta;                
         
         Cliente c = new Cliente("localhost", porta);
@@ -356,16 +359,26 @@ public class Cliente {
         
         nomeDoArquivoDeDownload = "C:\\Users\\Francisco\\Documents\\Nova Pasta\\";
         
-        arquivoDeDownload = new Arquivo(nomeDoArquivoDeDownload);
+        arquivoDeDownload = new Arquivo(new File(nomeDoArquivoDeDownload));
         
         File[] arquivos = arquivoDeDownload.getArquivo().listFiles();
         for (File file : arquivos) {
             if (file.isFile()) {
-                c.realizarDownload(c.caminhoUsuariosRemotos, new Arquivo(file));
+                arquivoDeDownload = new Arquivo(file);
+                arquivoDeDownload.setNomeDoDestino(c.caminhoUsuariosRemotos);
+                c.realizarDownload(arquivoDeDownload);
             }
         }
         
         /* Realizar upload */
+        nomeDoArquivoDeUpload = "C:\\Users\\Francisco\\Documents\\Servidor\\doServidor.odt";
+        
+        Arquivo arquivoDeUpload = new Arquivo(new File(nomeDoArquivoDeUpload));
+        arquivoDeUpload.setNomeDoDestino("C:\\Users\\Francisco\\");
+        
+        c.realizarUpload(arquivoDeUpload);
+        
+        
     }
     
 }
