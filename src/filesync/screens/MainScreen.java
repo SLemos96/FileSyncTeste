@@ -6,11 +6,12 @@
 package filesync.screens;
 
 import filesync.comunicao.ArvoreDeArquivos;
+import filesync.comunicao.ArvoreGraficaDeArquivos;
 import filesync.comunicao.Cliente;
+import filesync.comunicao.FileSystemModel;
 import filesync.comunicao.Parametro;
 import java.io.File;
 import javax.swing.JFileChooser;
-import filesync.controle.EscolhaDiretorio;
 import filesync.controle.AutenticadorUsuario;
 import filesync.controle.FileSync;
 import filesync.persistencia.ArquivoDestino;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JTree;
+
 
 /**
  *
@@ -31,17 +34,33 @@ public class MainScreen extends javax.swing.JFrame {
     /**
      * Creates new form MainScreen
      */    
+    private FileSystemModel fsmRemoto;
+    private ArvoreGraficaDeArquivos arvoreLocal;
+    private ArvoreGraficaDeArquivos arvoreRemota;
     private ArvoreDeArquivos arvoreDeArquivosLocal; 
     private ArvoreDeArquivos arvoreDeArquivosRemota;
     private EscolhaDiretorio chooseDiretorio;
     private List<ArquivoDestino> arquivosDiferentes;
     
     public MainScreen() {
-        initComponents();
-        chooseDiretorio = new EscolhaDiretorio();
+        initComponents();        
         arquivosDiferentes = new ArrayList<ArquivoDestino>();
+        fsmRemoto = null;
     }
 
+    /**
+     * @param diretorio
+     * @param isAreaLocal 
+     */
+    public void mostrarPainelDiretorio(FileSystemModel fsm, boolean isAreaLocal) {
+        if (isAreaLocal) {            
+            jTreeLocal.setModel(fsm);
+            
+        } else {
+            jTreeRemota.setModel(fsm);            
+        }
+    }
+    
     public void setPastaLocalField(String texto) {
         pastaLocalField.setText(texto);
     }
@@ -49,15 +68,7 @@ public class MainScreen extends javax.swing.JFrame {
     public void setPastaRemotaField(String texto) {
         pastaRemotaField.setText(texto);
     }
-    
-    public void setLocalTextArea(String texto) {
-        localTextArea.setText(texto);
-    }
-    
-    public void setRemoteTextArea(String texto) {
-        remoteTextArea.setText(texto);
-    }
-
+        
     public ArvoreDeArquivos getArvoreDeArquivosLocal() {
         return arvoreDeArquivosLocal;
     }
@@ -93,48 +104,7 @@ public class MainScreen extends javax.swing.JFrame {
             localTextArea.setText(text);
         }
     }*/
-    
-    public void formatarAreaDeTexto(ArvoreDeArquivos arvore, boolean isAreaRemota) {     
-        try {
-            arvoreDeArquivosRemota = arvore.clone();
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(MainScreen.class.getName()).log(Level.SEVERE, null, ex);
-        }
         
-        String[] lines;
-        String text = "";
-        int cont = 0;
-        
-        File raiz = arvore.getRaiz();
-        ArrayList<File> filhos;
-        LinkedList<File> fila = new LinkedList<>();
-        fila.push(raiz);
-        
-        while(!fila.isEmpty()) {
-            raiz = fila.pollFirst();
-            text += raiz.getName();
-            filhos = arvore.getFilhos(raiz);
-            
-            for (File filho : filhos) {
-                if (arvore.isDiretorio(filho))
-                    fila.push(filho);
-                else
-                    text += "\n" + filho.getName();
-            }                
-            
-            text += "\n    ";
-            
-        }
-                
-        if (isAreaRemota) {
-            pastaRemotaField.setText(raiz.getPath());
-            remoteTextArea.setText(text);            
-        } else {
-            pastaLocalField.setText(raiz.getPath());                        
-            localTextArea.setText(text);
-        }
-    }
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -150,12 +120,14 @@ public class MainScreen extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         pastaRemotaField = new javax.swing.JTextField();
-        procurarButton = new javax.swing.JButton();
+        procurarLocalButton = new javax.swing.JButton();
+        procurarRemotoButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        remoteTextArea = new javax.swing.JTextArea();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        localTextArea = new javax.swing.JTextArea();
+        jSeparator1 = new javax.swing.JSeparator();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTreeRemota = new javax.swing.JTree();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTreeLocal = new javax.swing.JTree();
         jButton4 = new javax.swing.JButton();
         jButtonComparar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -189,10 +161,17 @@ public class MainScreen extends javax.swing.JFrame {
             }
         });
 
-        procurarButton.setText("procurar");
-        procurarButton.addActionListener(new java.awt.event.ActionListener() {
+        procurarLocalButton.setText("procurar");
+        procurarLocalButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                procurarButtonActionPerformed(evt);
+                procurarLocalButtonActionPerformed(evt);
+            }
+        });
+
+        procurarRemotoButton.setText("procurar");
+        procurarRemotoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                procurarRemotoButtonActionPerformed(evt);
             }
         });
 
@@ -206,14 +185,17 @@ public class MainScreen extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(pastaLocalField, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(procurarButton)
+                .addComponent(procurarLocalButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pastaRemotaField, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addGap(93, 93, 93))
+                    .addComponent(jLabel2)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(pastaRemotaField, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(procurarRemotoButton)))
+                .addGap(14, 14, 14))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -225,7 +207,7 @@ public class MainScreen extends javax.swing.JFrame {
                         .addGap(0, 1, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(pastaLocalField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(procurarButton))
+                            .addComponent(procurarLocalButton))
                         .addGap(41, 41, 41))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -233,45 +215,45 @@ public class MainScreen extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pastaRemotaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(pastaRemotaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(procurarRemotoButton))))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        remoteTextArea.setColumns(20);
-        remoteTextArea.setRows(5);
-        jScrollPane3.setViewportView(remoteTextArea);
+        jTreeRemota.setModel(null);
+        jScrollPane1.setViewportView(jTreeRemota);
 
-        localTextArea.setColumns(20);
-        localTextArea.setRows(5);
-        jScrollPane4.setViewportView(localTextArea);
+        jTreeLocal.setModel(null);
+        jScrollPane2.setViewportView(jTreeLocal);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(148, 148, 148))
-            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel2Layout.createSequentialGroup()
-                    .addGap(20, 20, 20)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(527, Short.MAX_VALUE)))
+                .addGap(9, 9, 9)
+                .addComponent(jScrollPane2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1)
+                .addGap(15, 15, 15))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(22, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(8, 8, 8))))
                 .addContainerGap())
-            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                    .addContainerGap(21, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(10, 10, 10)))
         );
 
         jButton4.setText("Sincronizar");
@@ -369,24 +351,24 @@ public class MainScreen extends javax.swing.JFrame {
         
     }//GEN-LAST:event_jButton4ActionPerformed
 
-    private void procurarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarButtonActionPerformed
+    private void procurarLocalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarLocalButtonActionPerformed
+        // TODO add your handling code here:        
+        File dir = null;
+        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("file.separator")));
+        
+        EscolhaDiretorio ed = new EscolhaDiretorio(this, fsm, true);        
+    }//GEN-LAST:event_procurarLocalButtonActionPerformed
+
+    private void procurarRemotoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarRemotoButtonActionPerformed
         // TODO add your handling code here:
-        pastaLocalField.setText(escolherDiretorio());
-        exibirDiretorio();
-    }//GEN-LAST:event_procurarButtonActionPerformed
+        EscolhaDiretorio ed;
+        if (Cliente.getInstance().acessarPastaRemota())
+            ed = new EscolhaDiretorio(this, fsmRemoto, false);
+        else
+            JOptionPane.showMessageDialog(rootPane, "Falha no envio de mensagem");
+    }//GEN-LAST:event_procurarRemotoButtonActionPerformed
     
-    public String escolherDiretorio() {
-        File raiz = chooseDiretorio.escolherDiretorio();
-        arvoreDeArquivosLocal = new ArvoreDeArquivos(raiz);
-        return raiz.toString();    
-    }
     
-    public void exibirDiretorio() {
-        if (arvoreDeArquivosLocal != null) {
-            setPastaLocalField(arvoreDeArquivosLocal.getRaiz().toString());
-            formatarAreaDeTexto(arvoreDeArquivosLocal, false);
-        }
-    }
     
     public String listarArquivosDiferentes() {
         String text = "";
@@ -524,7 +506,7 @@ public class MainScreen extends javax.swing.JFrame {
             return -1;
         else
             return 0;
-    }
+    }    
     
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -545,14 +527,18 @@ public class MainScreen extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTextArea localTextArea;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTree jTreeLocal;
+    private javax.swing.JTree jTreeRemota;
     private javax.swing.JTextField pastaLocalField;
     private javax.swing.JTextField pastaRemotaField;
-    private javax.swing.JButton procurarButton;
-    private javax.swing.JTextArea remoteTextArea;
+    private javax.swing.JButton procurarLocalButton;
+    private javax.swing.JButton procurarRemotoButton;
     // End of variables declaration//GEN-END:variables
-    
 
+    public void setFSMRemoto(FileSystemModel arvoreDeArquivosRemoto) {
+        this.fsmRemoto = arvoreDeArquivosRemoto;
+    }    
 }
