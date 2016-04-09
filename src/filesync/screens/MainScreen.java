@@ -345,7 +345,7 @@ public class MainScreen extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
         } else {
             Cliente c = Cliente.getInstance();
-            c.sincronizarArquivos();
+            c.obterListaDeArquivos();
             
         }
         

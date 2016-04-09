@@ -12,9 +12,11 @@ import filesync.comunicao.Reply;
 import filesync.controle.AutenticadorUsuario;
 import filesync.screens.EscolhaDiretorio;
 import filesync.persistencia.BDArquivo;
+import filesync.persistencia.DadosLogin;
 import filesync.persistencia.IBancoDados;
 import filesync.persistencia.Usuario;
 import filesync.screens.MainScreen;
+import filesync.screens.ServerScreen;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,22 +25,28 @@ import java.util.logging.Logger;
  * Comente as classes e seus métodos... Podem ser comentários simplistas
  * @author Reinaldo
  */
-public class Cliente extends Thread{
-
-
+public class Cliente {
+    private final String fs = System.getProperty("file.separator");
+    private final String raizCliente = "FileSync";
+    private final String usuariosRemotos = "usuários_remotos";
+    private final String caminhoRaizCliente = System.getProperty("user.home") + fs + raizCliente;
+    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos + fs;
+    private int buffer_size;
     private boolean conectadoServidor;
     private TipoRequisicao tipoRequisicao;
     private Reply resposta;
     private Request requisicao;
     private Socket cliente;
-    private MainScreen telaPrincipal = new MainScreen();
+    private MainScreen telaPrincipal;
     private ArvoreDeArquivos arvoreDeArquivosRemota;
     private String serverName;
     private int porta;
     private static Cliente instance;
     private boolean recebeuFSMRemoto;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     
-    private Cliente() {                
+    private Cliente() {                    
     }
     
     public static Cliente getInstance() {
@@ -54,30 +62,39 @@ public class Cliente extends Thread{
         }
     }
     
-    
-    public void run() {
-    }
+    public Cliente(String serverName, int porta) throws IOException {
+        this.serverName = serverName;
+        this.porta = porta;                    
+        new File(System.getProperty("user.home") + fs + raizCliente).mkdir();
+        new File(System.getProperty("user.home") + fs + raizCliente + fs + usuariosRemotos).mkdir();
+    }                
     
     /**
      * 
-     * @return true se a comunicação foi realizada, false caso contrario
+     * @return true se a comunicação foi realizada e o usuario foi conectado, false caso contrario
      */
     public boolean conectarServidor(Usuario user, String serverName, int porta) {
-        Request requisicao;       
+        
         this.serverName = serverName;
         this.porta = porta;
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
-            
-        requisicao = new Request(TipoRequisicao.Autenticacao, user); 
         
-        enviarRequisicao(requisicao);
-        receberResposta();
-            
+        realizarAutenticacao(user);
+        
         System.out.println("Conectado a " +
             cliente.getRemoteSocketAddress());
         
         return conectadoServidor;        
+    }
+    
+    public boolean realizarAutenticacao(Usuario user) {
+        requisicao = new Request(TipoRequisicao.Autenticacao, user); 
+        
+        enviarRequisicao();
+        receberResposta();                
+        
+        return resposta.getSucesso();
     }
     
     public boolean encerrarConexao() {
@@ -100,44 +117,94 @@ public class Cliente extends Thread{
         }
     }
     
-    public void enviarRequisicao(Request requisicao) {
+    public void enviarRequisicao() {        
         try {
             cliente = new Socket(serverName, porta);
             OutputStream saidaParaServidor = cliente.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
             oos.writeObject(requisicao);
-
+            
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        }                    
     }
     
-    public boolean acessarPastaRemota() {
-        Request requisicao;
+    public boolean realizarUpload(String destino, Arquivo arquivoLocal) throws FileNotFoundException, IOException {
+        File arquivo;
+        byte[] data;
+        int size;
+        FileInputStream fis;
         
+        data = new byte[buffer_size];
+        arquivo = new File(destino);
+        fis = new FileInputStream(arquivo);
+        
+        fis = new FileInputStream(arquivo);
+        size = fis.available();
+        data = new byte[size];
+        while(fis.read(data) != -1);
+        arquivoLocal.setData(data);
+        fis.close();
+        
+        requisicao = new Request(TipoRequisicao.Upload, arquivoLocal);
+        
+        enviarRequisicao();
+        receberResposta();                
+        
+        return resposta.getSucesso();
+    }
+    
+    public void realizarDownload(String destinoLocal, Arquivo arquivoRemoto) {
+        File arquivoLocal;
+        byte[] data;                
+         
+        requisicao = new Request(TipoRequisicao.Download, arquivoRemoto);        
+        enviarRequisicao();
+        receberResposta();
+                
+        arquivoLocal = new File(destinoLocal + fs + arquivoRemoto);
+        
+        data = resposta.getBytes();
+        
+        try (FileOutputStream fos = new FileOutputStream(arquivoLocal)) {            
+            fos.write(data);
+            fos.flush();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }                        
+    }
+    
+    public boolean acessarPastaRemota() {        
         requisicao = new Request(TipoRequisicao.ObterEscolhaRemotaDiretorio, null);
         
-        enviarRequisicao(requisicao);
+        enviarRequisicao();
         receberResposta();
         
         return recebeuFSMRemoto;
     }
     
-    
+    public void obterListaDeArquivos() {
+        requisicao = new Request(TipoRequisicao.ObterListaArquivo, null);
+        
+        enviarRequisicao();
+        receberResposta();
+    }
     
     public void receberResposta() {
         try {
             InputStream respostaServidor = cliente.getInputStream();
             ObjectInputStream ois = new ObjectInputStream(respostaServidor);
-            Reply resposta = (Reply) ois.readObject();
+            resposta = (Reply) ois.readObject();
             
-            analisarResposta(resposta);                        
+            //analisarResposta(resposta);
+            //encerrarConexao();
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }    
     
     public void analisarResposta(Reply resposta) {
@@ -149,7 +216,7 @@ public class Cliente extends Thread{
         } else if (TipoRequisicao.ExibirArquivosRemotos == tipo) {
             exibirArvoreDeArquivosRemoto((FileSystemModel) resposta.getObject());
         } else if (TipoRequisicao.ObterListaArquivo == tipo) {
-            System.out.println("o");
+            receberArquivosRemotos(resposta.getBytes());
         } else if (TipoRequisicao.Upload == tipo) {
             System.out.println("u");
         } else if (TipoRequisicao.Autenticacao == tipo) {
@@ -162,7 +229,7 @@ public class Cliente extends Thread{
     
     public void exibirArvoreDeArquivosRemoto(FileSystemModel arvoreDeArquivosRemoto) {
         if (arvoreDeArquivosRemoto != null) {
-            telaPrincipal.setFSMRemoto(arvoreDeArquivosRemoto);        
+            telaPrincipal.setFSMRemoto(arvoreDeArquivosRemoto);
             recebeuFSMRemoto = true;
         } else {
             recebeuFSMRemoto = false;
@@ -177,9 +244,9 @@ public class Cliente extends Thread{
     }
     
     public void exibirArquivosRemotos(Usuario usuario) {
-        Request requisicao;
+
         requisicao = new Request(TipoRequisicao.ExibirArquivos, usuario);
-        enviarRequisicao(requisicao);
+        enviarRequisicao();
          
     }
     
@@ -258,6 +325,47 @@ public class Cliente extends Thread{
     
     private ObjectInputStream ObjectInputStream(InputStream respostaServidor) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void receberArquivosRemotos(byte[] arquivo) {
+        
+    }
+
+    public String getCaminhoRaizCliente() {
+        return caminhoRaizCliente;
+    }
+
+    public String getCaminhoUsuariosRemotos() {
+        return caminhoUsuariosRemotos;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        File local;
+        String nomeDoArquivoDeDownload;
+        Arquivo arquivoDeDownload;
+        int porta = ServerScreen.porta;                
+        
+        Cliente c = new Cliente("localhost", porta);
+        
+        Usuario user = new Usuario(new DadosLogin("admin", "admin"));        
+                
+        c.conectarServidor(user, "localhost", porta);
+        
+        /* Realizar download */
+        local = new File(c.caminhoUsuariosRemotos);
+        
+        nomeDoArquivoDeDownload = "C:\\Users\\Francisco\\Documents\\Nova Pasta\\";
+        
+        arquivoDeDownload = new Arquivo(nomeDoArquivoDeDownload);
+        
+        File[] arquivos = arquivoDeDownload.getArquivo().listFiles();
+        for (File file : arquivos) {
+            if (file.isFile()) {
+                c.realizarDownload(c.caminhoUsuariosRemotos, new Arquivo(file));
+            }
+        }
+        
+        /* Realizar upload */
     }
     
 }

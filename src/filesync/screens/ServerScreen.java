@@ -13,6 +13,8 @@ import filesync.comunicao.ServidorTCP;
  */
 public class ServerScreen extends javax.swing.JFrame {
 
+    private ServidorTCP servidor;
+    public static int porta = 5800;
     /**
      * Creates new form ServerScreen
      */
@@ -20,14 +22,20 @@ public class ServerScreen extends javax.swing.JFrame {
         initComponents();        
         this.setTitle("Log do servidor");
         this.setVisible(true);
-        new ServidorTCP(raiz, ip,logTextPane).start();        
+        servidor = new ServidorTCP(raiz, ip, logTextPane);        
+        servidor.start();
     }
     
     public ServerScreen(String ip) {
         initComponents();        
         this.setTitle("Log do servidor");
         this.setVisible(true);
-        new ServidorTCP(ip,logTextPane).start();        
+        servidor = new ServidorTCP(ip, porta, logTextPane);
+        servidor.start();
+    }
+    
+    public int getPorta() {
+        return servidor.getPorta();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -41,12 +49,20 @@ public class ServerScreen extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         logTextPane = new javax.swing.JTextPane();
         jLabel1 = new javax.swing.JLabel();
+        jButtonLimparLog = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jScrollPane1.setViewportView(logTextPane);
 
         jLabel1.setText("Log do servidor");
+
+        jButtonLimparLog.setText("limparLog");
+        jButtonLimparLog.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLimparLogActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -58,14 +74,18 @@ public class ServerScreen extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addGap(0, 485, Short.MAX_VALUE)))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonLimparLog)
+                        .addGap(0, 390, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addComponent(jLabel1)
+                .addGap(28, 28, 28)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
+                    .addComponent(jButtonLimparLog))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE)
                 .addContainerGap())
@@ -73,6 +93,11 @@ public class ServerScreen extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonLimparLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLimparLogActionPerformed
+        // TODO add your handling code here:
+        servidor.getLogDoServidor().zerarLog();
+    }//GEN-LAST:event_jButtonLimparLogActionPerformed
 
 
     
@@ -83,8 +108,13 @@ public class ServerScreen extends javax.swing.JFrame {
     public void addLogTextPane(String texto) {
         logTextPane.add(null, texto);
     }
+    
+    public static void main(String... args) {
+        new ServerScreen("localhost");
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonLimparLog;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextPane logTextPane;

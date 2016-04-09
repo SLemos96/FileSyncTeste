@@ -11,12 +11,23 @@ import java.io.File;
  *
  * @author Francisco
  */
-public class NomeDoArquivo implements Parametro{
+public class Arquivo implements Parametro{
     private File arquivo;
+    private byte[] data;
     
-    public NomeDoArquivo(File arquivo) {
+    public Arquivo(File arquivo) {
         this.arquivo = arquivo;
     }
+    
+    public Arquivo(String nome) {
+        this.arquivo = new File(nome);
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+    
+    
     
     public File getArquivo() {
         return arquivo;
@@ -26,6 +37,15 @@ public class NomeDoArquivo implements Parametro{
         return arquivo.getAbsolutePath();
     }
 
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+    
+    @Override
+    public String toString() {
+        return arquivo.getName();
+    }
+    
     @Override
     public String tipoParametro() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

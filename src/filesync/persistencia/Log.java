@@ -40,5 +40,6 @@ public class Log {
     
     public void zerarLog() {
         this.log = "";
+        this.telaDeLog.setText(log);
     }
 }

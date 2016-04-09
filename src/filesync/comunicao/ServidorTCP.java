@@ -19,14 +19,14 @@ import java.util.HashMap;
  * Aguarda uma conexão, recebe objetos e envia objetos, armazena arvore de diretorios
  * @author Francisco
  */
-public class ServidorTCP extends Thread{
+public class ServidorTCP extends Thread{    
     private String ipServer;
     private String diretorioRaiz;
     private Log logDoServidor;
     private ServerSocket serverSocket;
     private Socket cliente;
     private Request requisicao;
-    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;
+    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;        
     
     public ServidorTCP(int porta){
         try {
@@ -38,10 +38,10 @@ public class ServidorTCP extends Thread{
         } 
     }
 
-    public ServidorTCP(String ipServer, JTextPane logTextPane)  {
+    public ServidorTCP(String ipServer, int porta, JTextPane logTextPane)  {
         try {
-            this.ipServer = ipServer;                        
-            serverSocket = new ServerSocket(0);
+            this.ipServer = ipServer;                                    
+            serverSocket = new ServerSocket(porta);
             logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n");            
             logTextPane.setText(logDoServidor.getLog());
         } catch (IOException ex) {
@@ -97,5 +97,11 @@ public class ServidorTCP extends Thread{
         } catch (InterruptedException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }                
-    }    
+    }   
+
+    public Log getLogDoServidor() {
+        return logDoServidor;
+    }
+    
+    
 }

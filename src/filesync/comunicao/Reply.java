@@ -27,15 +27,32 @@ public class Reply implements Serializable {
         this.resposta = resposta;
     }
     
+    public Reply(Object objeto, byte[] data) {
+        this.objeto = objeto;
+        this.bytes = data;
+    }
+    
     public Reply(boolean sucesso, TipoRequisicao resposta) {
         this.sucesso = sucesso;
         this.resposta = resposta;
     }
     
+    public Reply(boolean sucesso) {
+        this.sucesso = sucesso;
+    }   
+
+    Reply(byte[] data) {
+        this.bytes = data;
+    }
+    
     public Object getObject() {
         return objeto;
     }
-            
+    
+    public boolean getSucesso() {
+        return sucesso;
+    }
+        
     public byte[] getBytes() {
         return bytes;
     }

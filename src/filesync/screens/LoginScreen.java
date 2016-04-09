@@ -296,10 +296,16 @@ public class LoginScreen extends javax.swing.JFrame {
     }//GEN-LAST:event_jFieldSenhaActionPerformed
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
+        int porta = 0;
         
-        if (verificarLogin()) {
-            int porta;
+        try {
             porta = Integer.parseInt(portaField.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Porta invalida");
+            return;
+        }
+        
+        if (verificarLogin()) {                        
             Usuario usuario;
             usuario = new Usuario(new DadosLogin(jFieldUsuario.getText(), obterSenha(jFieldSenha)));
             if (fileSync.autenticarServidor(usuario, IPDestino.getText(),

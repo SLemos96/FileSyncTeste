@@ -65,6 +65,11 @@ public class EscolhaDiretorio extends javax.swing.JFrame implements Serializable
 
         setTitle("Escolha Diretorio");
         setAlwaysOnTop(true);
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
+            }
+        });
 
         jTree1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -87,6 +92,11 @@ public class EscolhaDiretorio extends javax.swing.JFrame implements Serializable
         jButtonSelecionar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSelecionarActionPerformed(evt);
+            }
+        });
+        jButtonSelecionar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jButtonSelecionarKeyPressed(evt);
             }
         });
 
@@ -116,25 +126,46 @@ public class EscolhaDiretorio extends javax.swing.JFrame implements Serializable
 
     private void jTree1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTree1MouseClicked
         // TODO add your handling code here:
-        try {            
-            jTreeSelecao = jTree1.getSelectionPath().toString().replaceAll("[\\[\\]]", "").replace(", ", "\\");            
-        } catch (Exception e) {
-            
-        }
+        
+        jTreeSelecao = converterPath(jTree1.getSelectionPath().toString());                        
+        
     }//GEN-LAST:event_jTree1MouseClicked
 
     private void jTree1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTree1KeyReleased
-        // TODO add your handling code here:
+        // TODO add your handling code here:        
+        //selecaoDeDiretorio();
     }//GEN-LAST:event_jTree1KeyReleased
 
     private void jButtonSelecionarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSelecionarMouseClicked
         // TODO add your handling code here:        
+        selecaoDeDiretorio();
     }//GEN-LAST:event_jButtonSelecionarMouseClicked
 
     private void jButtonSelecionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSelecionarActionPerformed
         // TODO add your handling code here:
+        //selecaoDeDiretorio(); 
+    }//GEN-LAST:event_jButtonSelecionarActionPerformed
+
+    private void jButtonSelecionarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jButtonSelecionarKeyPressed
+        // TODO add your handling code here:
+        //selecaoDeDiretorio();
+    }//GEN-LAST:event_jButtonSelecionarKeyPressed
+
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
+        // TODO add your handling code here:
+        //selecaoDeDiretorio();
+    }//GEN-LAST:event_formKeyPressed
+
+    public static String converterPath(String path) {
+        String fs = System.getProperty("file.separator");
+        
+        return path.replaceAll("["+fs+"["+fs+"]]", "").replace(", ", fs);
+    }
+    
+    private void selecaoDeDiretorio() {
         try {
-            if (raiz.equals("\\")) {
+            JOptionPane.showMessageDialog(rootPane, "Arquivo " + jTreeSelecao + " selecionado!");
+            if (raiz.equals(System.getProperty("file.separator"))) {
                 jTreeSelecao = jTreeSelecao.substring(1);
                 arquivoSelecionado = new File(jTreeSelecao);
             }
@@ -142,7 +173,10 @@ public class EscolhaDiretorio extends javax.swing.JFrame implements Serializable
                 arquivoSelecionado = new File(jTreeSelecao);
         } catch(Exception e) {
             arquivoSelecionado = null;
+            return;
         }
+                
+        
         if (arquivoSelecionado != null && arquivoSelecionado.exists()) {
             if (arquivoSelecionado.isFile()) {
                 arquivoSelecionado = null;
@@ -154,8 +188,8 @@ public class EscolhaDiretorio extends javax.swing.JFrame implements Serializable
         } else {
             JOptionPane.showMessageDialog(rootPane, "Nenhum diretorio foi selecionado");
         }
-    }//GEN-LAST:event_jButtonSelecionarActionPerformed
-
+    }
+    
     private void exibirDiretorioSelecionado() {
         if (isLocal) {
             telaPrincipal.setPastaLocalField(jTreeSelecao);
