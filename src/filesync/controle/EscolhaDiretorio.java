@@ -8,15 +8,16 @@ import java.awt.*;
 import java.io.*;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Francisco
  */
-public class EscolhaDiretorio {
+public class EscolhaDiretorio implements Serializable{
     private JFileChooser fc;
     private Component dialogBox;
-    private File diretorioOrigem;
+    private File diretorioEscolhido;
    
     
     public EscolhaDiretorio() {
@@ -37,8 +38,8 @@ public class EscolhaDiretorio {
         this.dialogBox = dialogBox;
     }
     
-    public File getDiretorioOrigem() {
-        return diretorioOrigem;
+    public File getDiretorioEscolhido() {
+        return diretorioEscolhido;
     }
 
     public Component getDialogBox() {
@@ -50,7 +51,14 @@ public class EscolhaDiretorio {
     }
     
     public File escolherDiretorio() {
-        fc.showOpenDialog(dialogBox);        
+        int option;
+        
+        option = fc.showOpenDialog(dialogBox);
+        
+        if (option == JFileChooser.ERROR_OPTION)
+            JOptionPane.showMessageDialog(null, "Erro ao abrir diretorio");
+        
+        this.diretorioEscolhido = fc.getSelectedFile();
         return fc.getSelectedFile();
     }
     

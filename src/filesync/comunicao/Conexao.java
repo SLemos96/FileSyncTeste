@@ -6,6 +6,7 @@
 package filesync.comunicao;
 
 import filesync.controle.AutenticadorUsuario;
+import filesync.screens.EscolhaDiretorio;
 import filesync.persistencia.BDArquivo;
 import filesync.persistencia.DadosLogin;
 import filesync.persistencia.Log;
@@ -98,11 +99,33 @@ public class Conexao extends Thread{
             System.out.println("u");
         } else if (TipoRequisicao.Autenticacao == tipo) {
             verificarAutenticacao((Usuario) requisicao.getParametro());            
+        } else if (TipoRequisicao.ObterEscolhaRemotaDiretorio == tipo) {
+            enviarEscolhaDeDiretorioRemota(tipo);
+        } else if (TipoRequisicao.ExibirArquivosRemotos == tipo) {
+            enviarArvoreDeArquivosRemotos((NomeDoArquivo)requisicao.getParametro());
         }
     }
     
+    public void enviarArvoreDeArquivosRemotos(NomeDoArquivo arquivoName) {
+        Reply resposta;
+        ArvoreDeArquivos arvore;
+        
+        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("file.separator")));
+        
+        resposta = new Reply(fsm, TipoRequisicao.ObterEscolhaRemotaDiretorio);
+    }
+    
+    public void enviarEscolhaDeDiretorioRemota(TipoRequisicao tipo) {
+        Reply resposta;
+        
+        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("file.separator")));
+        resposta = new Reply(fsm, tipo);
+        
+        enviarResposta(resposta);        
+    }
+    
     public void enviarDiretorioCliente(Usuario usuario) {        
-        logDoServidor.escreverLog("cliente requer os seus diretorios\n");        
+        
         Reply resposta;
         
         String usuarioNome = usuario.getDadosLogin().getNomeDeUsuario();
@@ -124,10 +147,7 @@ public class Conexao extends Thread{
         
         if (sucesso = autenticador.autenticarUsuario(nomeUsuario, senha)) {
             logDoServidor.escreverLogLine(nomeUsuario + " esta conectado");
-            File raizUsuario = new File(pastaRaiz + File.separator + nomeUsuario);
-            logDoServidor.escreverLogLine("criando diretorio de " + raizUsuario.getAbsolutePath());
-            raizUsuario.mkdir();
-            diretorioDosUsuarios.put(nomeUsuario, new ArvoreDeArquivos(raizUsuario));
+            //criarPastaDoUsuario(nomeUsuario);
         }
         else
             logDoServidor.escreverLogLine(nomeUsuario + " não está conectado");
@@ -136,6 +156,12 @@ public class Conexao extends Thread{
         enviarResposta(resposta);
     }
     
+    public void criarPastaDoUsuario(String nomeUsuario) {        
+        File raizUsuario = new File(pastaRaiz + File.separator + nomeUsuario);
+        logDoServidor.escreverLogLine("criando diretorio de " + raizUsuario.getAbsolutePath());
+        raizUsuario.mkdir();
+        diretorioDosUsuarios.put(nomeUsuario, new ArvoreDeArquivos(raizUsuario));
+    }
     
     public void enviarResposta(Reply resposta) {
         try {

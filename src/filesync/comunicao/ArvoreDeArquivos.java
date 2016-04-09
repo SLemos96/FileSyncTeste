@@ -20,9 +20,13 @@ import java.util.logging.Logger;
  * @author Francisco
  */
 public class ArvoreDeArquivos implements Serializable, Parametro, Cloneable{
-    private final Tree<File> arvoreDeArquivos;
+    private Tree<File> arvoreDeArquivos;
     private File raiz;
     
+    public ArvoreDeArquivos(File raiz, Tree<File> arvoreDeArquivos) {
+        this.raiz = raiz;
+        this.arvoreDeArquivos = arvoreDeArquivos;
+    }
     /**
      *
      * @param raiz
@@ -74,6 +78,10 @@ public class ArvoreDeArquivos implements Serializable, Parametro, Cloneable{
         return arvoreDeArquivos.containsElement(diretorio);
     }
     
+    public boolean contemArquivo(File arquivo) {
+        return arvoreDeArquivos.containsElement(arquivo);
+    }
+    
     public ArrayList<File> getFilhos(File arquivo) {
         return new ArrayList<>(arvoreDeArquivos.getSuccessors(arquivo));
     }
@@ -98,6 +106,12 @@ public class ArvoreDeArquivos implements Serializable, Parametro, Cloneable{
         ArvoreDeArquivos arvoreDeArquivos = 
                 new ArvoreDeArquivos(raiz);
         System.out.println(arvoreDeArquivos.listaDeArquivos());
+    }
+    
+    
+    //Método pouco ineficiente
+    public ArvoreDeArquivos subArvoreDeArquivos(File arquivoFilho) {
+        return new ArvoreDeArquivos(arquivoFilho, arvoreDeArquivos.getTree(arquivoFilho));
     }
 
     @Override

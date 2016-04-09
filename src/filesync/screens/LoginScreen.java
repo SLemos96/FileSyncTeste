@@ -318,6 +318,15 @@ public class LoginScreen extends javax.swing.JFrame {
 
     private void iniciarServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_iniciarServidorButtonActionPerformed
         // TODO add your handling code here:
+        //Login sem escolha de pasta
+        String serverName;
+        
+        serverName = IPServidorField.getText();
+        
+        fileSync.iniciarServidor(serverName);
+        dispose();
+        
+        /* Login com escolha de pasta
         String raiz = diretorioField.getText();
         if (raiz.equals(""))
             JOptionPane.showMessageDialog(null, "Um diretório deve ser especificado");
@@ -325,7 +334,7 @@ public class LoginScreen extends javax.swing.JFrame {
             fileSync.iniciarServidor(IPServidorField.getText(), raiz);
             new ServerScreen(IPServidorField.getText(), raiz).setVisible(true);            
             dispose();
-        }
+        }*/
     }//GEN-LAST:event_iniciarServidorButtonActionPerformed
 
     private void IPServidorFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPServidorFieldActionPerformed

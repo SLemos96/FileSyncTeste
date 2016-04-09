@@ -17,7 +17,9 @@ public enum TipoRequisicao implements Serializable{
     Download("download"),
     Upload("upload"),
     ObterListaArquivo("obterDiretorio"),
-    ExibirArquivos("listar");
+    ExibirArquivos("listar"),
+    ExibirArquivosRemotos("listando arquivos remotos"),
+    ObterEscolhaRemotaDiretorio("Escolha de Diretorio remota");
     
     
         

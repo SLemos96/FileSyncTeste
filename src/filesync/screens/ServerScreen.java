@@ -22,7 +22,13 @@ public class ServerScreen extends javax.swing.JFrame {
         this.setVisible(true);
         new ServidorTCP(raiz, ip,logTextPane).start();        
     }
-
+    
+    public ServerScreen(String ip) {
+        initComponents();        
+        this.setTitle("Log do servidor");
+        this.setVisible(true);
+        new ServidorTCP(ip,logTextPane).start();        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

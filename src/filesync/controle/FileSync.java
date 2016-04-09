@@ -40,10 +40,9 @@ public class FileSync {
         new LoginScreen(this).setVisible(true);        
     }
     
-    public void iniciarServidor(String ServerName, String pastaRaiz) {
-        /*telaServidor = new ServerScreen();
-        servidor = new ServidorTCP(telaServidor, pastaRaiz);        
-        servidor.start();*/
+    public void iniciarServidor(String serverName) {
+        this.serverName = serverName;
+        new ServerScreen(serverName);
     }
     
     public int getPorta() {
@@ -54,18 +53,11 @@ public class FileSync {
         boolean sucesso = cliente.conectarServidor(usuario, serverName, porta);
         if (sucesso) {
             cliente.mostrarTelaPrincipal();
-            exibirArquivosRemotos(usuario);
+            cliente.exibirArquivosRemotos(usuario);
         } 
         return sucesso;
     }
-    
-    public void exibirArquivosRemotos(Usuario usuario) {
-        Request requisicao;
-        requisicao = new Request(TipoRequisicao.ExibirArquivos, usuario);
-        cliente.enviarRequisicao(requisicao);
         
-        cliente.receberResposta();
-    }
     
     public boolean autenticarUsuario(String user, String senha) {
         boolean sucesso = autenticador.autenticarUsuario(user, senha);        

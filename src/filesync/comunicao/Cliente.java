@@ -10,6 +10,7 @@ import java.net.*;
 import filesync.comunicao.Request;
 import filesync.comunicao.Reply;
 import filesync.controle.AutenticadorUsuario;
+import filesync.screens.EscolhaDiretorio;
 import filesync.persistencia.BDArquivo;
 import filesync.persistencia.IBancoDados;
 import filesync.persistencia.Usuario;
@@ -35,6 +36,7 @@ public class Cliente extends Thread{
     private String serverName;
     private int porta;
     private static Cliente instance;
+    private boolean recebeuFSMRemoto;
     
     private Cliente() {                
     }
@@ -67,7 +69,8 @@ public class Cliente extends Thread{
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
             
-        requisicao = new Request(TipoRequisicao.Autenticacao, user);            
+        requisicao = new Request(TipoRequisicao.Autenticacao, user); 
+        
         enviarRequisicao(requisicao);
         receberResposta();
             
@@ -110,6 +113,19 @@ public class Cliente extends Thread{
         
     }
     
+    public boolean acessarPastaRemota() {
+        Request requisicao;
+        
+        requisicao = new Request(TipoRequisicao.ObterEscolhaRemotaDiretorio, null);
+        
+        enviarRequisicao(requisicao);
+        receberResposta();
+        
+        return recebeuFSMRemoto;
+    }
+    
+    
+    
     public void receberResposta() {
         try {
             InputStream respostaServidor = cliente.getInputStream();
@@ -130,15 +146,41 @@ public class Cliente extends Thread{
         
         if (TipoRequisicao.Download == tipo) {
             System.out.println("d");
-        } else if (TipoRequisicao.ExibirArquivos == tipo) {
-            exibirArquivosParaCliente((ArvoreDeArquivos) resposta.getObject());
+        } else if (TipoRequisicao.ExibirArquivosRemotos == tipo) {
+            exibirArvoreDeArquivosRemoto((FileSystemModel) resposta.getObject());
         } else if (TipoRequisicao.ObterListaArquivo == tipo) {
             System.out.println("o");
         } else if (TipoRequisicao.Upload == tipo) {
             System.out.println("u");
         } else if (TipoRequisicao.Autenticacao == tipo) {
             conectadoServidor =  resposta.isSucesso();
+        } else if(TipoRequisicao.ObterEscolhaRemotaDiretorio == tipo) {
+            exibirArvoreDeArquivosRemoto((FileSystemModel) resposta.getObject());
         }
+    }
+    
+    
+    public void exibirArvoreDeArquivosRemoto(FileSystemModel arvoreDeArquivosRemoto) {
+        if (arvoreDeArquivosRemoto != null) {
+            telaPrincipal.setFSMRemoto(arvoreDeArquivosRemoto);        
+            recebeuFSMRemoto = true;
+        } else {
+            recebeuFSMRemoto = false;
+        }
+    }
+    
+    public void escolherDiretorioRemoto(EscolhaDiretorio diretorioRemoto) {
+        /*String raizDiretorioRemoto;
+        
+        raizDiretorioRemoto = diretorioRemoto.escolherDiretorio().getPath();
+        telaPrincipal.setPastaRemotaField(raizDiretorioRemoto);*/
+    }
+    
+    public void exibirArquivosRemotos(Usuario usuario) {
+        Request requisicao;
+        requisicao = new Request(TipoRequisicao.ExibirArquivos, usuario);
+        enviarRequisicao(requisicao);
+         
     }
     
     public void analisarRequisicao(Request requisicao, Parametro parametro) {
@@ -166,14 +208,9 @@ public class Cliente extends Thread{
         telaPrincipal.setVisible(true);
     }
 
-    private void exibirArquivosParaCliente(ArvoreDeArquivos arvoreDeArquivos) {
-        try {
-            arvoreDeArquivosRemota = arvoreDeArquivos.clone();
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        telaPrincipal.formatarAreaDeTexto(arvoreDeArquivos, true);
-    }
+    private void exibirArquivosParaCliente(FileSystemModel arvoreDeArquivos, boolean isAreaRemota) {        
+        telaPrincipal.mostrarPainelDiretorio(arvoreDeArquivos, isAreaRemota);
+    }        
 
     public void sincronizarArquivos() {
         File diretorioDestino = telaPrincipal.getRaizLocal();
@@ -202,7 +239,25 @@ public class Cliente extends Thread{
         
     }
 
+    
+    public Object desserializarObjeto(byte[] objeto) {
+        ByteArrayInputStream in;        
+        ObjectInputStream is;
+        
+        try {
+            in = new ByteArrayInputStream(objeto);
+            is = new ObjectInputStream(in);
+            return is.readObject();
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;        
+    }
+    
     private ObjectInputStream ObjectInputStream(InputStream respostaServidor) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }

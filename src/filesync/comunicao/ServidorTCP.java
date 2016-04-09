@@ -38,6 +38,16 @@ public class ServidorTCP extends Thread{
         } 
     }
 
+    public ServidorTCP(String ipServer, JTextPane logTextPane)  {
+        try {
+            this.ipServer = ipServer;                        
+            serverSocket = new ServerSocket(0);
+            logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n");            
+            logTextPane.setText(logDoServidor.getLog());
+        } catch (IOException ex) {
+            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     public ServidorTCP(String ipServer, String pastaRaiz, JTextPane logTextPane)  {
         try {
