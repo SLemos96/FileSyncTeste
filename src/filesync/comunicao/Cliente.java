@@ -17,6 +17,9 @@ import filesync.persistencia.IBancoDados;
 import filesync.persistencia.Usuario;
 import filesync.screens.MainScreen;
 import filesync.screens.ServerScreen;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +33,7 @@ public class Cliente {
     private final String raizCliente = "FileSync";
     private final String usuariosRemotos = "usuários_remotos";
     private final String caminhoRaizCliente = System.getProperty("user.home") + fs + raizCliente;
-    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos + fs;
+    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos;
     private int buffer_size = 1048576;  // 2 megabytes
     private boolean conectadoServidor;
     private TipoRequisicao tipoRequisicao;
@@ -164,8 +167,8 @@ public class Cliente {
         enviarRequisicao();
         receberResposta();
                 
-        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino() + fs + arquivoRemoto);
-        
+        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino());
+        System.out.println(arquivoLocal.getAbsolutePath());
         data = resposta.getBytes();
         
         try (FileOutputStream fos = new FileOutputStream(arquivoLocal)) {            
@@ -325,6 +328,22 @@ public class Cliente {
         return null;        
     }
     
+    public void exibirArvoreDeDiretoriosRemotos(String caminhoDiretorioRemoto) {
+        Arquivo diretorioRemoto;
+        
+        diretorioRemoto = new Arquivo(caminhoDiretorioRemoto);
+                
+        requisicao = new Request(TipoRequisicao.ExibirDiretoriosRemotos, 
+                diretorioRemoto);
+        
+        enviarRequisicao();
+        receberResposta();
+        
+        diretorioRemoto = (Arquivo) resposta.getObject();
+        
+        System.out.println(diretorioRemoto.listaArvoreDeDiretorios());
+    }
+    
     private ObjectInputStream ObjectInputStream(InputStream respostaServidor) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -341,11 +360,60 @@ public class Cliente {
         return caminhoUsuariosRemotos;
     }
     
+    
+    public void criarArvoreDeArquivos(Path fileSystem) {
+        System.out.println("CriadorDeArvore chamado por fileWalksTree");
+        File file = fileSystem.toFile();
+        Arquivo arquivo = new Arquivo(file);
+        
+        if (file.isFile()) {
+           arquivo.setNomeDoDestino(caminhoUsuariosRemotos + fileSystem);
+           realizarDownload(arquivo);
+        } else {
+            file.mkdir();
+        }
+    }
+    
+    public void criarArvoreDeArquivos(String nomeDoArquivoDeDownload) {
+        Arquivo arquivoDeDownload = new Arquivo(new File(nomeDoArquivoDeDownload));
+                       
+        criarArvoreDeArquivos(caminhoUsuariosRemotos, new File(nomeDoArquivoDeDownload).listFiles()
+                        , arquivoDeDownload);        
+        
+    }
+    
+    public void criarArvoreDeArquivosRemotos(String nomeDoArquivoDeDownload) {
+        
+    }
+    
+    public void criarArvoreDeArquivos(String caminhoLocal, File[] filhos, Arquivo raiz) {
+        String caminhoEstendido = caminhoLocal+fs+ raiz + fs;
+        new File( caminhoEstendido).mkdir();
+        for (File filho : filhos) {
+            if (filho.isDirectory() && filho.listFiles().length != 0) {                
+               
+               criarArvoreDeArquivos(caminhoEstendido, filho.listFiles(), 
+                        new Arquivo(filho));
+            }
+            else {
+                if (!filho.isHidden()) {
+                    raiz.setNomeDoDestino(caminhoEstendido + raiz);                
+                    raiz.addCaminhoLocal(fs + filho.getName());
+                    raiz.setNomeDoArquivo(filho.getName());
+                    //raiz.setNomeDoArquivo(raiz+ fs + filho.getName());
+                    realizarDownload(raiz);
+                }
+            }
+        }
+    }
+    
     public static void main(String[] args) throws IOException {
         File local;
         String nomeDoArquivoDeDownload;
         Arquivo arquivoDeDownload;
         String nomeDoArquivoDeUpload;
+        String caminhoDoArquivo;
+        
         int porta = ServerScreen.porta;                
         
         Cliente c = new Cliente("localhost", porta);
@@ -354,31 +422,49 @@ public class Cliente {
                 
         c.conectarServidor(user, "localhost", porta);
         
+        /* Exibir arvore de diretorios */
+        
+        String nomeDoDiretorioDeDownload = "C:\\Users\\Francisco\\Documents\\TesteArquivos";
+        
+        //c.exibirArvoreDeDiretoriosRemotos(nomeDoDiretorioDeDownload);
+               
+        
         /* Realizar download */
         local = new File(c.caminhoUsuariosRemotos);
         
-        nomeDoArquivoDeDownload = "C:\\Users\\Francisco\\Documents\\Nova Pasta\\";
+        nomeDoArquivoDeDownload = "C:\\Users\\Francisco\\Documents\\TesteArquivos";
+               
         
+        //Files.walkFileTree(Paths.get(nomeDoArquivoDeDownload), 
+        //        new CriadorDeArvoreDeDiretorio(Paths.get(c.caminhoUsuariosRemotos), c));
+        
+        c.criarArvoreDeArquivos(nomeDoArquivoDeDownload);
+        
+        /*
         arquivoDeDownload = new Arquivo(new File(nomeDoArquivoDeDownload));
-        
+        String destinoDoArquivo = c.caminhoUsuariosRemotos;
         File[] arquivos = arquivoDeDownload.getArquivo().listFiles();
         for (File file : arquivos) {
             if (file.isFile()) {
                 arquivoDeDownload = new Arquivo(file);
-                arquivoDeDownload.setNomeDoDestino(c.caminhoUsuariosRemotos);
+                arquivoDeDownload.setNomeDoDestino(destinoDoArquivo);
                 c.realizarDownload(arquivoDeDownload);
+            } else {
+                new File(destinoDoArquivo + file.getName()).mkdir();
             }
-        }
+        }*/
         
-        /* Realizar upload */
-        nomeDoArquivoDeUpload = "C:\\Users\\Francisco\\Documents\\Servidor\\doServidor.odt";
+        
+        
+        /* Realizar upload *
+        nomeDoArquivoDeUpload = "C:\\Users\\Francisco\\Documents";
         
         Arquivo arquivoDeUpload = new Arquivo(new File(nomeDoArquivoDeUpload));
         arquivoDeUpload.setNomeDoDestino("C:\\Users\\Francisco\\");
         
         c.realizarUpload(arquivoDeUpload);
         
-        
+        */
     }
     
 }

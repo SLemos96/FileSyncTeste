@@ -107,6 +107,8 @@ public class Conexao extends Thread{
             enviarEscolhaDeDiretorioRemota(tipo);
         } else if (TipoRequisicao.ExibirArquivosRemotos == tipo) {
             enviarArvoreDeArquivosRemotos((Arquivo)requisicao.getParametro());
+        } else if (TipoRequisicao.ExibirDiretoriosRemotos == tipo) {
+            exibirDiretoriosRemotos((Arquivo) requisicao.getParametro());
         }
     }
     
@@ -200,6 +202,24 @@ public class Conexao extends Thread{
         }
         return null;
     }
+    
+    private void exibirDiretoriosRemotos(Arquivo arquivo) {
+        File diretorioLocal = new File(arquivo.getNomeDoDestino());
+        
+        if (!diretorioLocal.exists()) {
+            logDoServidor.escreverLogLine("diretorio " + 
+                    diretorioLocal.getAbsolutePath() + " não encontrado.");
+        }
+        
+        arquivo = new Arquivo(diretorioLocal);
+        arquivo.criarArvoreDeDiretorio(diretorioLocal);
+        
+        logDoServidor.escreverLogLine("arvore de diretorios local: \n" + arquivo.listaArvoreDeDiretorios());
+        resposta = new Reply(arquivo);
+        
+        enviarResposta();
+        logDoServidor.escreverLogLine("Enviando arvore de diretorios do caminho local: " + arquivo);        
+    }    
 
     private void enviarListaDeArquivos(TipoRequisicao tipo) {
         File file = new File(System.getProperty("file.separator"));        
@@ -259,11 +279,14 @@ public class Conexao extends Thread{
     private void realizarUpload(Arquivo arquivoRequerido) {
         int size;
         FileInputStream fis;
-        byte[] data;        
+        File arquivoLocal;
+        byte[] data;      
+        
+        arquivoLocal = new File(arquivoRequerido.getCaminhoLocal());
                 
         try {
-            logDoServidor.escreverLogLine("realizando upload do arquivo: " + arquivoRequerido);
-            fis = new FileInputStream(arquivoRequerido.getArquivo());
+            logDoServidor.escreverLogLine("realizando upload do arquivo: '" + arquivoRequerido.getCaminhoLocal()+"'");
+            fis = new FileInputStream(arquivoLocal);
             size = fis.available();
             data = new byte[size];
             
@@ -274,7 +297,7 @@ public class Conexao extends Thread{
             enviarResposta();
             
         } catch (IOException ex) {
-            logDoServidor.escreverLogLine("Erro na abertura ou fechamento do arquivo");
+            logDoServidor.escreverLogLine("Erro na abertura ou fechamento do arquivo '" + arquivoRequerido.getNomeDoDestino()+"'");
         }
     }
 }

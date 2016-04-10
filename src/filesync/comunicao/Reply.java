@@ -22,6 +22,10 @@ public class Reply implements Serializable {
         this.resposta = resposta;
     }
     
+    public Reply(Object objeto) {
+        this.objeto = objeto;
+    }
+    
     public Reply(Object objeto, TipoRequisicao resposta) {
         this.objeto = objeto;
         this.resposta = resposta;

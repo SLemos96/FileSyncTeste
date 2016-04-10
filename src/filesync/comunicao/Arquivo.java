@@ -5,7 +5,15 @@
  */
 package filesync.comunicao;
 
+import java.nio.file.*;
+import filesync.persistencia.Tree;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -13,23 +21,46 @@ import java.io.File;
  */
 public class Arquivo implements Parametro{
     private File arquivo;
-    private String caminhoDoArquivo;
-    private String nomeDoDestino;
+    private String caminhoLocal;
+    private String caminhoDeDestino;
     private String nomeDoArquivo;
     private long tamanho;
     private long ultimaAlteracao;
+    private Tree<String> arvoreDeDiretorios;
     private byte[] data;
+    private boolean isDiretorio;
     
     public Arquivo(File arquivo) {
         this.arquivo = arquivo;
         this.nomeDoArquivo = arquivo.getName();
-        this.caminhoDoArquivo = arquivo.getAbsolutePath();
+        this.caminhoLocal = arquivo.getAbsolutePath();
         this.tamanho = arquivo.length();
         this.ultimaAlteracao = arquivo.lastModified();
+        this.isDiretorio = arquivo.isDirectory();
+        this.caminhoDeDestino = "";        
+    }
+
+    public String getCaminhoDeDestino() {
+        return caminhoDeDestino;
+    }
+
+    public void setCaminhoDoArquivo(String caminhoDoArquivo) {
+        this.caminhoLocal = caminhoDoArquivo;
+    }
+
+    
+    public boolean isIsDiretorio() {
+        return isDiretorio;
+    }
+
+    public Tree<String> getArvoreDeDiretorios() {
+        return arvoreDeDiretorios;
     }
     
+    
+    
     public Arquivo(String nomeDoDestino) {
-        this.nomeDoDestino = nomeDoDestino;
+        this.caminhoDeDestino = nomeDoDestino;
     }
 
     public String getNomeDoArquivo() {
@@ -46,11 +77,11 @@ public class Arquivo implements Parametro{
     }
 
     public String getNomeDoDestino() {
-        return nomeDoDestino;
+        return caminhoDeDestino;
     }
 
     public void setNomeDoDestino(String nomeDoDestino) {
-        this.nomeDoDestino = nomeDoDestino;
+        this.caminhoDeDestino = nomeDoDestino;
     }
             
     public File getArquivo() {
@@ -61,8 +92,8 @@ public class Arquivo implements Parametro{
         this.data = data;
     }
 
-    public String getCaminhoDoArquivo() {
-        return caminhoDoArquivo;
+    public String getCaminhoLocal() {
+        return caminhoLocal;
     }
 
     public long getTamanho() {
@@ -73,7 +104,112 @@ public class Arquivo implements Parametro{
         return ultimaAlteracao;
     }
     
+    public void addCaminhoLocal(String caminho) {
+        caminhoLocal += caminho;
+    }    
     
+    public void addCaminhoDeDestino(String caminho) {
+        caminhoDeDestino += caminho;        
+    }
+    
+    public void addNome(String caminho) {
+        nomeDoArquivo += caminho;
+    }
+    
+    public boolean criarArvoreDeDiretorio(File raiz) {
+        if (raiz.isDirectory()) {
+            arvoreDeDiretorios = new Tree<String >(raiz.getName());        
+            inicializarArvoreDeDiretorios(raiz);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public void inicializarArvoreDeDiretorios(File raiz) {
+        LinkedList<File> diretorios = new LinkedList<>();
+        diretorios.add(raiz);
+        
+        while(!diretorios.isEmpty()) {
+            raiz = diretorios.pollLast();
+            File[] arquivos = raiz.listFiles();
+            inicializarArvoreDeDiretorios(raiz.getName(), diretorios, arquivos);            
+        }
+    }
+    
+    private void inicializarArvoreDeDiretorios(String raiz, LinkedList<File> diretorios, File[] arquivos) {
+        if (arquivos != null) {
+            for (File arquivo : arquivos) {
+                if (!arquivo.isHidden() && arquivo.isDirectory()) {
+                   arvoreDeDiretorios.addLeaf(raiz, arquivo.getName());
+                   diretorios.push(arquivo);
+                }
+            }
+        }
+    }
+    
+    /*
+    public void inicializarArvoreDeDiretorios(File raiz) {
+        File[] arquivos = raiz.listFiles();
+        if (arquivos != null) {
+            for (File arquivo : arquivos) {
+                if (!arquivo.isHidden() && arquivo.isDirectory()) {
+                    arvoreDeDiretorios.addLeaf(raiz.getName(), arquivo.getName());                                        
+                    inicializarArvoreDeDiretorios(arquivo);
+                }
+            }
+                            
+        }
+    }*/
+    
+    /**
+     * Cria uma arvore de diretorio no caminho especificado
+     * @param caminhoDestino caminho especificado para criar uma arvore de
+     * diretorio
+     * @param fs o separar de arquivos do sistema
+     */
+    public void criarArvoreDeDiretorioLocal(String caminhoDestino, String fs) {
+        File arquivo;
+        String caminhoDeCriacao;
+        
+        caminhoDeCriacao = caminhoDestino + fs + nomeDoArquivo;
+        if (new File(caminhoDeCriacao).mkdir())
+            System.out.println("Diretorio Criado");
+        else
+            System.out.println("Diretorio: " + caminhoDeCriacao + "nao criado");
+        
+        ArrayList<String> filhos = new ArrayList<>(arvoreDeDiretorios.getSuccessors(nomeDoArquivo));
+        
+        for (String filho : filhos) {
+            new File(caminhoDeCriacao +fs + filho).mkdir();            
+        }                
+    }
+    
+    
+
+    public static void main(String[] args) throws IOException {
+        String nomeDoDiretorioDeDownload = "C:\\Users\\Francisco\\Documents\\";
+        
+        File diretorio = new File(nomeDoDiretorioDeDownload);
+        
+        Arquivo arquivo = new Arquivo(diretorio);
+        
+        arquivo.criarArvoreDeDiretorio(diretorio);
+        arquivo.criarArvoreDeDiretorioLocal(
+                "C:\\Users\\Francisco\\TesteArquivos" , System.getProperty("file.separator"));
+        
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/test.bin"));
+        oos.writeObject(arquivo.getArvoreDeDiretorios());
+        oos.close();
+        //arquivo.criarArvoreDeDiretorioLocal(System.getProperty("user.dir"),
+        //        System.getProperty("file.separator"));
+        
+        System.out.println(arquivo.listaArvoreDeDiretorios());    
+    }
+    
+    public String listaArvoreDeDiretorios() {
+        return arvoreDeDiretorios.toString();
+    }                       
     
     @Override
     public String toString() {
