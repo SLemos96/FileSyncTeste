@@ -58,7 +58,7 @@ public class GeradorDeResposta {
         } else if (TipoRequisicao.Autenticacao == tipo) {
             verificarAutenticacao((Usuario) requisicao.getParametro());            
         } else if (TipoRequisicao.ObterEscolhaRemotaDiretorio == tipo) {
-            enviarEscolhaDeDiretorioRemota(tipo);
+            enviarEscolhaDeDiretorioRemota((Arquivo) requisicao.getParametro());
         } else if (TipoRequisicao.ExibirArquivosRemotos == tipo) {
             enviarArvoreDeArquivosRemotos((Arquivo)requisicao.getParametro());
         } else if (TipoRequisicao.ExibirDiretoriosRemotos == tipo) {
@@ -75,11 +75,17 @@ public class GeradorDeResposta {
         resposta = new Reply(fsm, TipoRequisicao.ObterEscolhaRemotaDiretorio);
     }
     
-    public void enviarEscolhaDeDiretorioRemota(TipoRequisicao tipo) {
-        Reply resposta;
+    public void enviarEscolhaDeDiretorioRemota(Arquivo arquivo) {
+        String diretorioDeDestino = arquivo.getCaminhoDeDestino();
         
-        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("file.separator")));
-        resposta = new Reply(fsm, tipo);
+        File arquivoLocal = new File(diretorioDeDestino);
+                
+        Arquivo diretorio = new Arquivo(arquivoLocal);
+        
+        diretorio.inicializarArvoreDeDiretorios(arquivoLocal);
+        diretorio.criarArvoreDeDiretorioLocal(diretorioDeDestino, System.getProperty("file.separator"));
+        
+        resposta = new Reply(arquivoLocal);
         
         conexao.enviarResposta(resposta);        
     }

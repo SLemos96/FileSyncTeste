@@ -34,13 +34,14 @@ import java.util.logging.Logger;
  * @author Reinaldo
  */
 public class Cliente {
-    private final String fs = System.getProperty("file.separator");
-    private final String raizCliente = "FileSync" + fs;
-    private final String usuariosRemotos = "usuários_remotos" + fs;
-    private final String caminhoRaizCliente = System.getProperty("user.home") + fs + raizCliente;
-    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos + fs;
+    private String fs;
+    private final String RAIZ_CLIENTE = "FileSync";
+    private final String USUARIO_REMOTOS = "usuários_remotos";
+    private String caminhoRaizCliente;
+    private String caminhoUsuariosRemotos;
     private int buffer_size = 1048576;  // 2 megabytes
     private boolean conectadoServidor;
+    private boolean clienteLogado;
     private TipoRequisicao tipoRequisicao;
     private Reply resposta;
     private Request requisicao;
@@ -48,16 +49,23 @@ public class Cliente {
     private MainScreen telaPrincipal;    
     private String serverName;
     private int porta;    
-    private boolean recebeuFSMRemoto;    
+    private boolean recebeuFSMRemoto;      
     
     public Cliente() {
-        iniciarTelaPrincipal();
+        this.fs = System.getProperty("file.separator");
+        this.caminhoRaizCliente = System.getProperty("user.home") + fs + RAIZ_CLIENTE + fs;
+        this.caminhoUsuariosRemotos = caminhoRaizCliente + USUARIO_REMOTOS + fs;
+        new File(caminhoRaizCliente).mkdir();
+        //iniciarTelaPrincipal();
     }        
     
     public Cliente(String serverName, int porta) throws IOException {
         this.serverName = serverName;
-        this.porta = porta;                    
-        new File(System.getProperty("user.home") + fs + raizCliente).mkdir();
+        this.porta = porta;
+        this.fs = System.getProperty("file.separator");
+        this.caminhoRaizCliente = System.getProperty("user.home") + fs + RAIZ_CLIENTE + fs;
+        this.caminhoUsuariosRemotos = caminhoRaizCliente + USUARIO_REMOTOS + fs;
+        new File(caminhoRaizCliente).mkdir();
         //new File(System.getProperty("user.home") + fs + raizCliente + fs + usuariosRemotos).mkdir();        
     }
     
@@ -67,29 +75,40 @@ public class Cliente {
     
     /**
      * 
-     * @return true se a comunicação foi realizada e o usuario foi conectado, false caso contrario
+     * @return 1 conectado e logado, 0 conectado, mas nao logado, -1 nao conectado;
      */
-    public boolean conectarServidor(Usuario user, String serverName, int porta) {
+    public int conectarServidor(Usuario user, String serverName, int porta) {
+        int opcao = 0;
         this.serverName = serverName;
         this.porta = porta;
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
         
-        conectadoServidor = realizarAutenticacao(user);
+        realizarAutenticacao(user);
         
-        System.out.println("Conectado a " +
-            cliente.getRemoteSocketAddress());
+        if (conectadoServidor) {
+            opcao = 0;
+            if (clienteLogado)
+                opcao = 1;                            
+            System.out.println("Conectado a " +
+                cliente.getRemoteSocketAddress());            
+        } else {
+            opcao = -1;
+        }
         
-        return conectadoServidor;        
+        return opcao;        
     }
     
-    public boolean realizarAutenticacao(Usuario user) {
+    public void realizarAutenticacao(Usuario user) {
+        //boolean sucesso = conectadoServidor;
         requisicao = new Request(TipoRequisicao.Autenticacao, user); 
         
         enviarRequisicao();
-        receberResposta();                
-        
-        return resposta.getSucesso();
+        if (conectadoServidor == true) {
+            receberResposta();                        
+            clienteLogado = resposta.getSucesso();
+        } 
+        //return sucesso;
     }
     
     public boolean encerrarConexao() {
@@ -115,13 +134,17 @@ public class Cliente {
     public void enviarRequisicao() {        
         try {
             cliente = new Socket(serverName, porta);
+            conectadoServidor = true;
             OutputStream saidaParaServidor = cliente.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(saidaParaServidor);
             oos.writeObject(requisicao);
-            oos.flush();
+            oos.flush();            
+        } catch (ConnectException ex) {
+            conectadoServidor = false;
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }                    
+            conectadoServidor = false;
+        }               
     }
     
     public boolean realizarUpload(Arquivo arquivoLocal) {        
@@ -177,13 +200,19 @@ public class Cliente {
         }                   
     }
     
-    public boolean acessarPastaRemota() {        
-        requisicao = new Request(TipoRequisicao.ObterEscolhaRemotaDiretorio, null);
+    public Arquivo acessarPastaRemota() {        
+        // Obter diretorios a partir do diretorio home do pc remoto
+        requisicao = new Request(TipoRequisicao.ExibirDiretoriosRemotos, 
+                new Arquivo(true));
         
         enviarRequisicao();
         receberResposta();
         
-        return recebeuFSMRemoto;
+        Arquivo arquivoRemoto = (Arquivo) resposta.getObject();
+        arquivoRemoto.criarArvoreDeDiretorioLocal(caminhoRaizCliente, fs);
+        arquivoRemoto.setCaminhoDoArquivo(caminhoRaizCliente);
+        
+        return arquivoRemoto;
     }
     
     public void obterListaDeArquivos() {

@@ -30,6 +30,7 @@ public class Arquivo implements Parametro{
     private Tree<String> arvoreDeDiretorios;
     private byte[] data;
     private boolean isDiretorio;
+    private boolean isRemoto;
     
     public Arquivo(File arquivo) {
         this.arquivo = arquivo;
@@ -41,14 +42,26 @@ public class Arquivo implements Parametro{
         this.caminhoDeDestino = "";        
     }
 
-    public String getCaminhoDeDestino() {
-        return caminhoDeDestino;
+    
+    public Arquivo(boolean isRemoto) {        
+        this.isRemoto = isRemoto;
     }
-
+    
+    public Arquivo(String nomeDoDestino) {
+        this.caminhoDeDestino = nomeDoDestino;
+    }
+    
     public void setCaminhoDoArquivo(String caminhoDoArquivo) {
         this.caminhoLocal = caminhoDoArquivo;
     }
 
+    public String getCaminhoDeDestino() {
+        return caminhoDeDestino;
+    }
+
+    public boolean isIsRemoto() {
+        return isRemoto;
+    }
     
     public boolean isIsDiretorio() {
         return isDiretorio;
@@ -56,13 +69,7 @@ public class Arquivo implements Parametro{
 
     public Tree<String> getArvoreDeDiretorios() {
         return arvoreDeDiretorios;
-    }
-    
-    
-    
-    public Arquivo(String nomeDoDestino) {
-        this.caminhoDeDestino = nomeDoDestino;
-    }
+    }    
 
     public String getNomeDoArquivo() {
         return nomeDoArquivo;
@@ -77,7 +84,13 @@ public class Arquivo implements Parametro{
         return data;
     }
 
+    /**
+     * @return o nome do arquivo de destino se o arquivo foi criado localmente, 
+     * caso contrário o caminho da pasta home é retornado.     
+     */
     public String getNomeDoDestino() {
+        if (isRemoto)
+            return System.getProperty("user.home");
         return caminhoDeDestino;
     }
 

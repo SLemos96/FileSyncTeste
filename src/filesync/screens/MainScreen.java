@@ -14,6 +14,7 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import filesync.controle.AutenticadorUsuario;
 import filesync.controle.FileSync;
+import filesync.parametro.Arquivo;
 import filesync.persistencia.ArquivoDestino;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,12 +43,13 @@ public class MainScreen extends javax.swing.JFrame {
     private EscolhaDiretorio chooseDiretorio;
     private List<ArquivoDestino> arquivosDiferentes;
     private Cliente cliente;
+    private JFileChooser escolherDiretorio;
     
     public MainScreen(Cliente cliente) {
         initComponents();
         this.cliente = cliente;
         arquivosDiferentes = new ArrayList<ArquivoDestino>();
-        fsmRemoto = null;
+        fsmRemoto = null;                
     }
 
     /**
@@ -354,20 +356,35 @@ public class MainScreen extends javax.swing.JFrame {
     private void procurarLocalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarLocalButtonActionPerformed
         // TODO add your handling code here:        
         File dir = null;
-        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("user.home")));
         
-        EscolhaDiretorio ed = new EscolhaDiretorio(this, fsm, true);        
+        
+        JFileChooser escolherDiretorio = new JFileChooser(System.getProperty("user.home"));
+        escolherDiretorio.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        escolherDiretorio.showOpenDialog(jPanel1);
+        dir = escolherDiretorio.getSelectedFile();        
+        
+        if (dir != null) {
+            setPastaLocalField(dir.getAbsolutePath());
+            mostrarPainelDiretorio(new FileSystemModel(dir), true);
+        }
     }//GEN-LAST:event_procurarLocalButtonActionPerformed
 
     private void procurarRemotoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarRemotoButtonActionPerformed
         // TODO add your handling code here:
-        EscolhaDiretorio ed;
-        if (cliente.acessarPastaRemota())
-            ed = new EscolhaDiretorio(this, fsmRemoto, false);
-        else
-            JOptionPane.showMessageDialog(rootPane, "Falha no envio de mensagem");
+        Arquivo diretorioRemoto = cliente.acessarPastaRemota();
+        
+        File pastaLocal = new File(diretorioRemoto.getCaminhoLocal());
+        
+        JFileChooser escolherDiretorio = new JFileChooser(pastaLocal);
+        escolherDiretorio.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int fc = escolherDiretorio.showOpenDialog(jPanel1);
+        if (fc == JFileChooser.APPROVE_OPTION) {
+            pastaLocal = escolherDiretorio.getSelectedFile();
+            setPastaRemotaField(diretorioRemoto.getCaminhoLocal());
+            mostrarPainelDiretorio(new FileSystemModel(pastaLocal), false);
+        }
     }//GEN-LAST:event_procurarRemotoButtonActionPerformed
-    
+        
     
     /*
     public String listarArquivosDiferentes() {

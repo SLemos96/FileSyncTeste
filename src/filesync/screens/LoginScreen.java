@@ -309,15 +309,18 @@ public class LoginScreen extends javax.swing.JFrame {
         }
         fileSync.iniciarCliente();
         usuario = new Usuario(new DadosLogin(jFieldUsuario.getText(), obterSenha(jFieldSenha)));
-        
-        if (fileSync.autenticarServidor(usuario, jFieldIP_Cliente.getText(), porta)) {                                    
+        int opcao = fileSync.autenticarServidor(usuario, jFieldIP_Cliente.getText(), porta);
+        if (opcao == 1) {                                    
             //avisoDeLogin1.setText("Conexão estabelecida");
-            //avisoDeLogin1.setVisible(true);
-            dispose();
-            
+            //avisoDeLogin1.setVisible(true);            
+            JOptionPane.showMessageDialog(null, "Login efetuado com sucesso!!!");
+            fileSync.iniciarTelaPrincipal();
+            dispose();            
             //    JOptionPane.showMessageDialog(null, "Sevidor na porta: " + porta + " não encontrado");            
         }
-        else {
+        else if (opcao == -1){
+            JOptionPane.showMessageDialog(null, "Servidor não encontrado!");            
+        } else {
             JOptionPane.showMessageDialog(null, "Usuário ou Senha incorreta!");
         }
     }//GEN-LAST:event_jButtonClienteLoginActionPerformed

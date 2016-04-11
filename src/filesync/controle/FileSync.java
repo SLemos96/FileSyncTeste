@@ -42,6 +42,10 @@ public class FileSync {
         cliente  = new Cliente();        
     }
     
+    public void iniciarTelaPrincipal() {
+        cliente.mostrarTelaPrincipal();
+    }
+    
     public static String getNomePasta() {
         return nomePasta;
     }
@@ -55,15 +59,15 @@ public class FileSync {
         new ServerScreen(serverName, porta, diretorioServidor);
     }    
             
-    public boolean autenticarServidor(Usuario usuario, String serverName, int porta) {
-        boolean sucesso = cliente.conectarServidor(usuario, serverName, porta);
-        if (sucesso) {
+    public int autenticarServidor(Usuario usuario, String serverName, int porta) {
+        int opcao = cliente.conectarServidor(usuario, serverName, porta);/*
+        if (opcao == 1) {
             cliente.mostrarTelaPrincipal();
             new File(nomePasta+System.getProperty("file.separator")+ 
                     "local" + System.getProperty("file.separator")).mkdir();
             //cliente.exibirArquivosRemotos(usuario);
-        } 
-        return sucesso;
+        } */
+        return opcao;
     }
         
     
