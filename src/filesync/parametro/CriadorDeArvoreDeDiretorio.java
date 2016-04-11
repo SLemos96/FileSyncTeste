@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.comunicao;
+package filesync.parametro;
 
 import filesync.persistencia.Tree;
 import java.io.File;

@@ -5,6 +5,7 @@
  */
 package filesync.controle;
 
+import filesync.persistencia.ArvoreDeArquivos;
 import filesync.screens.*;
 import filesync.comunicao.*;
 import filesync.persistencia.BDArquivo;
@@ -17,8 +18,10 @@ import java.io.File;
  * @author Francisco
  */
 public class FileSync {
+    private static final String nomePasta = System.getProperty("user.home") +
+            System.getProperty("file.separator") + "FileSync" + System.getProperty("file.separator");
     private String serverName;
-    private final int portaPadrao = 2689;
+    private static int porta = 5800;
     private ServidorTCP servidor;
     private Cliente cliente;
     private AutenticadorUsuario autenticador;
@@ -28,32 +31,37 @@ public class FileSync {
     
     public FileSync() {                
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
-        chooseDiretorio = new EscolhaDiretorio();        
-        cliente = Cliente.getInstance();        
-    }
-
-    public int getPortaPadrao() {
-        return portaPadrao;
+        chooseDiretorio = new EscolhaDiretorio();
     }
         
     public void iniciar() {
-        new LoginScreen(this).setVisible(true);        
+        new LoginScreen(this, porta).setVisible(true);        
+    }        
+    
+    public void iniciarCliente() {        
+        cliente  = new Cliente();        
     }
     
-    public void iniciarServidor(String serverName) {
+    public static String getNomePasta() {
+        return nomePasta;
+    }
+    
+    public static int getPorta() {
+        return porta;
+    }
+    
+    public void iniciarServidor(String serverName, String diretorioServidor) {
         this.serverName = serverName;
-        new ServerScreen(serverName);
-    }
-    
-    public int getPorta() {
-        return servidor.getPorta();
-    }
+        new ServerScreen(serverName, porta, diretorioServidor);
+    }    
             
     public boolean autenticarServidor(Usuario usuario, String serverName, int porta) {
         boolean sucesso = cliente.conectarServidor(usuario, serverName, porta);
         if (sucesso) {
             cliente.mostrarTelaPrincipal();
-            cliente.exibirArquivosRemotos(usuario);
+            new File(nomePasta+System.getProperty("file.separator")+ 
+                    "local" + System.getProperty("file.separator")).mkdir();
+            //cliente.exibirArquivosRemotos(usuario);
         } 
         return sucesso;
     }

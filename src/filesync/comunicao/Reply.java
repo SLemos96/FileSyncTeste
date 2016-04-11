@@ -5,6 +5,7 @@
  */
 package filesync.comunicao;
 
+import filesync.controle.TipoRequisicao;
 import java.io.*;
 
 /**
@@ -20,6 +21,10 @@ public class Reply implements Serializable {
     public Reply(byte[] bytes, TipoRequisicao resposta) {
         this.bytes = bytes;
         this.resposta = resposta;
+    }
+    
+    public Reply(byte[] bytes) {
+        this.bytes = bytes;
     }
     
     public Reply(Object objeto) {
@@ -44,10 +49,6 @@ public class Reply implements Serializable {
     public Reply(boolean sucesso) {
         this.sucesso = sucesso;
     }   
-
-    Reply(byte[] data) {
-        this.bytes = data;
-    }
     
     public Object getObject() {
         return objeto;

@@ -5,7 +5,7 @@
  */
 package filesync.persistencia;
 
-import filesync.comunicao.Parametro;
+import filesync.parametro.Parametro;
 import java.io.File;
 import java.io.Serializable;
 

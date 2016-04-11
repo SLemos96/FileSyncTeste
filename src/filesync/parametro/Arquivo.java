@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.comunicao;
+package filesync.parametro;
 
+import filesync.parametro.Parametro;
 import java.nio.file.*;
 import filesync.persistencia.Tree;
 import java.io.File;
@@ -162,33 +163,50 @@ public class Arquivo implements Parametro{
         }
     }*/
     
+    public void criarArvoreDeDiretorioLocal(String caminhoDestino, String fs) {
+        criarArvoreDeDiretorioLocal(caminhoDestino, arvoreDeDiretorios.getHead(), fs);
+    }
+    
     /**
      * Cria uma arvore de diretorio no caminho especificado
      * @param caminhoDestino caminho especificado para criar uma arvore de
      * diretorio
      * @param fs o separar de arquivos do sistema
      */
-    public void criarArvoreDeDiretorioLocal(String caminhoDestino, String fs) {
-        File arquivo;
+    public void criarArvoreDeDiretorioLocal(String caminhoDestino, String raiz, String fs) {
         String caminhoDeCriacao;
         
-        caminhoDeCriacao = caminhoDestino + fs + nomeDoArquivo;
+        caminhoDeCriacao = caminhoDestino;
         if (new File(caminhoDeCriacao).mkdir())
             System.out.println("Diretorio Criado");
         else
-            System.out.println("Diretorio: " + caminhoDeCriacao + "nao criado");
+            System.out.println("Diretorio: " + caminhoDeCriacao + " nao criado");
         
-        ArrayList<String> filhos = new ArrayList<>(arvoreDeDiretorios.getSuccessors(nomeDoArquivo));
+        ArrayList<String> filhos = new ArrayList<>(arvoreDeDiretorios.getSuccessors(raiz));
         
         for (String filho : filhos) {
-            new File(caminhoDeCriacao +fs + filho).mkdir();            
+            //new File(caminhoDeCriacao +fs + filho).mkdir();
+            criarArvoreDeDiretorioLocal(caminhoDeCriacao + fs + filho, filho,fs);
         }                
     }
     
-    
-
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            
+            for (int i = 0; i<children.length; i++) {
+                boolean sucesso = deleteDir(new File(dir, children[i]));
+                if (!sucesso) {
+                    return false;
+                }
+            }
+        }
+        
+        return dir.delete();
+    }
+        
     public static void main(String[] args) throws IOException {
-        String nomeDoDiretorioDeDownload = "C:\\Users\\Francisco\\Documents\\";
+        String nomeDoDiretorioDeDownload = "C:\\Users\\Francisco";
         
         File diretorio = new File(nomeDoDiretorioDeDownload);
         
@@ -196,15 +214,16 @@ public class Arquivo implements Parametro{
         
         arquivo.criarArvoreDeDiretorio(diretorio);
         arquivo.criarArvoreDeDiretorioLocal(
-                "C:\\Users\\Francisco\\TesteArquivos" , System.getProperty("file.separator"));
+                "C:\\Users\\Francisco\\TesteDir" , System.getProperty("file.separator"));
         
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/test.bin"));
-        oos.writeObject(arquivo.getArvoreDeDiretorios());
-        oos.close();
+        //ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/test.bin"));
+        //oos.writeObject(arquivo.getArvoreDeDiretorios());
+        //oos.close();
         //arquivo.criarArvoreDeDiretorioLocal(System.getProperty("user.dir"),
         //        System.getProperty("file.separator"));
         
-        System.out.println(arquivo.listaArvoreDeDiretorios());    
+        System.out.println(arquivo.listaArvoreDeDiretorios());
+        Arquivo.deleteDir(new File("C:\\Users\\Francisco\\TesteDir"));
     }
     
     public String listaArvoreDeDiretorios() {

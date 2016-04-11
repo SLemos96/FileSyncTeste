@@ -4,8 +4,11 @@
  * and open the template in the editor.
  */
 package filesync.comunicao;
+import filesync.persistencia.ArvoreDeArquivos;
 import filesync.comunicao.Request;
 import filesync.comunicao.Reply;
+import filesync.controle.AutenticadorUsuario;
+import filesync.persistencia.BDArquivo;
 import filesync.persistencia.Log;
 import filesync.screens.MainScreen;
 import filesync.screens.ServerScreen;
@@ -26,7 +29,8 @@ public class ServidorTCP extends Thread{
     private ServerSocket serverSocket;
     private Socket cliente;
     private Request requisicao;
-    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;        
+    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;  
+    private AutenticadorUsuario autenticador;
     
     public ServidorTCP(int porta){
         try {
@@ -49,19 +53,22 @@ public class ServidorTCP extends Thread{
         }
     }
     
-    public ServidorTCP(String ipServer, String pastaRaiz, JTextPane logTextPane)  {
+    public ServidorTCP(String ipServer, int porta, String pastaRaiz, JTextPane logTextPane)  {
         try {
             this.ipServer = ipServer;
             this.diretorioRaiz = pastaRaiz;
-            this.diretorioDosUsuarios = new HashMap<String, ArvoreDeArquivos>();            
-            serverSocket = new ServerSocket(0);
+            this.diretorioDosUsuarios = new HashMap<String, ArvoreDeArquivos>();
+            serverSocket = new ServerSocket(porta);
             logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n"
-                    + "criando diretório em: " + pastaRaiz + "\n");
+                    + "diretorio criado em: " + pastaRaiz + "\n");
+            this.autenticador = new AutenticadorUsuario(new BDArquivo());
             new File(pastaRaiz).mkdir();
             logTextPane.setText(logDoServidor.getLog());
+        } catch (ConnectException e) {
+            logDoServidor.escreverLogLine("A porta " + porta + " atualmente já se encontra em uso");
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
     }
     
     public void escreverLog(String mensagem) {
@@ -89,7 +96,7 @@ public class ServidorTCP extends Thread{
             cliente = serverSocket.accept();
             escreverLog("Conexão estabelecida com " +
                 cliente.getRemoteSocketAddress());
-            Thread conexao = new Conexao(cliente, logDoServidor, diretorioDosUsuarios, diretorioRaiz);
+            Thread conexao = new Conexao(cliente, logDoServidor, diretorioDosUsuarios, diretorioRaiz, autenticador);
             conexao.start();
             conexao.join();                                    
         } catch (IOException ex) {

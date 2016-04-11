@@ -5,11 +5,16 @@
  */
 package filesync.comunicao;
 
+import filesync.controle.TipoRequisicao;
+import filesync.parametro.Arquivo;
+import filesync.parametro.Parametro;
+import filesync.persistencia.FileSystemModel;
 import java.io.*;
 import java.net.*;
 import filesync.comunicao.Request;
 import filesync.comunicao.Reply;
 import filesync.controle.AutenticadorUsuario;
+import filesync.controle.FileSync;
 import filesync.screens.EscolhaDiretorio;
 import filesync.persistencia.BDArquivo;
 import filesync.persistencia.DadosLogin;
@@ -30,60 +35,47 @@ import java.util.logging.Logger;
  */
 public class Cliente {
     private final String fs = System.getProperty("file.separator");
-    private final String raizCliente = "FileSync";
-    private final String usuariosRemotos = "usuários_remotos";
+    private final String raizCliente = "FileSync" + fs;
+    private final String usuariosRemotos = "usuários_remotos" + fs;
     private final String caminhoRaizCliente = System.getProperty("user.home") + fs + raizCliente;
-    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos;
+    private final String caminhoUsuariosRemotos = caminhoRaizCliente + fs + usuariosRemotos + fs;
     private int buffer_size = 1048576;  // 2 megabytes
     private boolean conectadoServidor;
     private TipoRequisicao tipoRequisicao;
     private Reply resposta;
     private Request requisicao;
     private Socket cliente;
-    private MainScreen telaPrincipal;
-    private ArvoreDeArquivos arvoreDeArquivosRemota;
+    private MainScreen telaPrincipal;    
     private String serverName;
-    private int porta;
-    private static Cliente instance;
-    private boolean recebeuFSMRemoto;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private int porta;    
+    private boolean recebeuFSMRemoto;    
     
-    private Cliente() {                    
-    }
-    
-    public static Cliente getInstance() {
-        if (instance == null) {
-            inicializaInstancia();
-        }
-        return instance;
-    }
-    
-    private static synchronized void inicializaInstancia() {
-        if (instance == null) {
-            instance = new Cliente();
-        }
-    }
+    public Cliente() {
+        iniciarTelaPrincipal();
+    }        
     
     public Cliente(String serverName, int porta) throws IOException {
         this.serverName = serverName;
         this.porta = porta;                    
         new File(System.getProperty("user.home") + fs + raizCliente).mkdir();
-        new File(System.getProperty("user.home") + fs + raizCliente + fs + usuariosRemotos).mkdir();
-    }                
+        //new File(System.getProperty("user.home") + fs + raizCliente + fs + usuariosRemotos).mkdir();        
+    }
+    
+    public final void iniciarTelaPrincipal() {
+        telaPrincipal = new MainScreen(this);
+    }
     
     /**
      * 
      * @return true se a comunicação foi realizada e o usuario foi conectado, false caso contrario
      */
     public boolean conectarServidor(Usuario user, String serverName, int porta) {
-        
         this.serverName = serverName;
         this.porta = porta;
         System.out.println("Conectando ao " + serverName + 
                 " na porta " + porta);
         
-        realizarAutenticacao(user);
+        conectadoServidor = realizarAutenticacao(user);
         
         System.out.println("Conectado a " +
             cliente.getRemoteSocketAddress());
@@ -144,7 +136,7 @@ public class Cliente {
             
             if (size > 0)
                 while(fis.read(data) != -1);
-            
+            fis.close();
             arquivoLocal.setData(data);
             
             requisicao = new Request(TipoRequisicao.Upload, arquivoLocal);        
@@ -161,24 +153,28 @@ public class Cliente {
     
     public void realizarDownload(Arquivo arquivoRemoto) {
         File arquivoLocal;
-        byte[] data;                
+        byte[] data;  
          
         requisicao = new Request(TipoRequisicao.Download, arquivoRemoto);        
         enviarRequisicao();
         receberResposta();
                 
-        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino());
-        System.out.println(arquivoLocal.getAbsolutePath());
+        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino());        
         data = resposta.getBytes();
         
-        try (FileOutputStream fos = new FileOutputStream(arquivoLocal)) {            
+        try {
+            FileOutputStream fos = new FileOutputStream(arquivoLocal);            
             fos.write(data);
             fos.flush();
+            fos.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }                        
+        } catch (NullPointerException ex) {
+            System.out.println("Arquivo: \n" + arquivoLocal.getAbsolutePath() + " nao foi aberto");
+            
+        }                   
     }
     
     public boolean acessarPastaRemota() {        
@@ -277,6 +273,7 @@ public class Cliente {
     }
     
     public void mostrarTelaPrincipal() {
+        telaPrincipal = new MainScreen(this);
         telaPrincipal.setVisible(true);
     }
 
@@ -285,29 +282,7 @@ public class Cliente {
     }        
 
     public void sincronizarArquivos() {
-        File diretorioDestino = telaPrincipal.getRaizLocal();
-        
-        LinkedList<File> arquivos = telaPrincipal.arquivosFilhos(arvoreDeArquivosRemota);
-        
-        
-        while(!arquivos.isEmpty()) {
-            File arquivo = arquivos.pollLast();
-            
-            File novoArquivo = new File(diretorioDestino, arquivo.getName());
-            
-            /*
-            if(!diretorioDestino.exists()) {
-                diretorioDestino.mkdir();
-            }
-            arquivo.renameTo(new File(diretorioDestino, arquivo.getName()));*/
-            /* CRIAR ARQUIVO COM ESTE NOME*/
-            System.out.println(novoArquivo);
-            try {
-                arquivo.createNewFile();
-            } catch (IOException ex) {
-                Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        File diretorioDestino = telaPrincipal.getRaizLocal();                             
         
     }
 
@@ -414,7 +389,7 @@ public class Cliente {
         String nomeDoArquivoDeUpload;
         String caminhoDoArquivo;
         
-        int porta = ServerScreen.porta;                
+        int porta = FileSync.getPorta();                
         
         Cliente c = new Cliente("localhost", porta);
         
@@ -438,23 +413,22 @@ public class Cliente {
         //Files.walkFileTree(Paths.get(nomeDoArquivoDeDownload), 
         //        new CriadorDeArvoreDeDiretorio(Paths.get(c.caminhoUsuariosRemotos), c));
         
-        c.criarArvoreDeArquivos(nomeDoArquivoDeDownload);
+        //c.criarArvoreDeArquivos(nomeDoArquivoDeDownload);
         
-        /*
+        /* realizar download local */
+        
         arquivoDeDownload = new Arquivo(new File(nomeDoArquivoDeDownload));
-        String destinoDoArquivo = c.caminhoUsuariosRemotos;
+        String destinoDoArquivo = FileSync.getNomePasta();
         File[] arquivos = arquivoDeDownload.getArquivo().listFiles();
         for (File file : arquivos) {
             if (file.isFile()) {
                 arquivoDeDownload = new Arquivo(file);
-                arquivoDeDownload.setNomeDoDestino(destinoDoArquivo);
+                arquivoDeDownload.setNomeDoDestino(destinoDoArquivo + file.getName());
                 c.realizarDownload(arquivoDeDownload);
             } else {
                 new File(destinoDoArquivo + file.getName()).mkdir();
             }
-        }*/
-        
-        
+        }                
         
         /* Realizar upload *
         nomeDoArquivoDeUpload = "C:\\Users\\Francisco\\Documents";

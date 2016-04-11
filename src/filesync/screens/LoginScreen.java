@@ -25,18 +25,19 @@ public class LoginScreen extends javax.swing.JFrame {
     /**
      * Creates new form LoginButton
      */
-    public LoginScreen(FileSync fileSync) {
+    public LoginScreen(FileSync fileSync, int porta) {
         initComponents();
         jFieldUsuario.setText("admin");
         jFieldSenha.setText("admin");
+        jFieldPorta.setText(Integer.toString(porta));
         this.fileSync = fileSync;        
         try {
-            IPServidorField.setText(InetAddress.getLocalHost().getHostAddress());
+            jFieldIP_Servidor.setText(InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException ex) {
             Logger.getLogger(LoginScreen.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        diretorioField.setText(System.getProperty("user.home")+"\\FileSyncRemote");
+        jFieldDiretorioServidor.setText(System.getProperty("user.home")+"\\FileSyncRemote");
     }
 
     /**
@@ -50,10 +51,10 @@ public class LoginScreen extends javax.swing.JFrame {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
-        LoginButton = new javax.swing.JButton();
+        jButtonClienteLogin = new javax.swing.JButton();
         jFieldSenha = new javax.swing.JPasswordField();
-        IPDestino = new javax.swing.JTextField();
-        portaField = new javax.swing.JTextField();
+        jFieldIP_Cliente = new javax.swing.JTextField();
+        jFieldPorta = new javax.swing.JTextField();
         IPDestLabel = new javax.swing.JLabel();
         jCheckBoxIPLocal = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
@@ -62,10 +63,10 @@ public class LoginScreen extends javax.swing.JFrame {
         jFieldUsuario = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
-        IPServidorField = new javax.swing.JTextField();
+        jFieldIP_Servidor = new javax.swing.JTextField();
         iniciarServidorButton = new javax.swing.JButton();
         avisoDeLogin1 = new javax.swing.JLabel();
-        diretorioField = new javax.swing.JTextField();
+        jFieldDiretorioServidor = new javax.swing.JTextField();
         butaoProcurar = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
 
@@ -73,10 +74,10 @@ public class LoginScreen extends javax.swing.JFrame {
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
 
-        LoginButton.setText("Login");
-        LoginButton.addActionListener(new java.awt.event.ActionListener() {
+        jButtonClienteLogin.setText("Login");
+        jButtonClienteLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LoginButtonActionPerformed(evt);
+                jButtonClienteLoginActionPerformed(evt);
             }
         });
 
@@ -86,16 +87,16 @@ public class LoginScreen extends javax.swing.JFrame {
             }
         });
 
-        IPDestino.setText("localhost");
-        IPDestino.addActionListener(new java.awt.event.ActionListener() {
+        jFieldIP_Cliente.setText("localhost");
+        jFieldIP_Cliente.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                IPDestinoActionPerformed(evt);
+                jFieldIP_ClienteActionPerformed(evt);
             }
         });
 
-        portaField.addActionListener(new java.awt.event.ActionListener() {
+        jFieldPorta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                portaFieldActionPerformed(evt);
+                jFieldPortaActionPerformed(evt);
             }
         });
 
@@ -134,11 +135,11 @@ public class LoginScreen extends javax.swing.JFrame {
                             .addComponent(IPDestLabel))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(LoginButton)
-                            .addComponent(portaField, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonClienteLogin)
+                            .addComponent(jFieldPorta, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jFieldIP_Cliente, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jFieldUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jFieldSenha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -161,14 +162,14 @@ public class LoginScreen extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(IPDestLabel)
-                    .addComponent(IPDestino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFieldIP_Cliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jCheckBoxIPLocal))
                 .addGap(4, 4, 4)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(portaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFieldPorta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portaLabel))
                 .addGap(23, 23, 23)
-                .addComponent(LoginButton)
+                .addComponent(jButtonClienteLogin)
                 .addContainerGap(39, Short.MAX_VALUE))
         );
 
@@ -176,9 +177,9 @@ public class LoginScreen extends javax.swing.JFrame {
 
         jLabel6.setText("IP_Servidor:");
 
-        IPServidorField.addActionListener(new java.awt.event.ActionListener() {
+        jFieldIP_Servidor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                IPServidorFieldActionPerformed(evt);
+                jFieldIP_ServidorActionPerformed(evt);
             }
         });
 
@@ -191,9 +192,9 @@ public class LoginScreen extends javax.swing.JFrame {
 
         avisoDeLogin1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
-        diretorioField.addActionListener(new java.awt.event.ActionListener() {
+        jFieldDiretorioServidor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                diretorioFieldActionPerformed(evt);
+                jFieldDiretorioServidorActionPerformed(evt);
             }
         });
 
@@ -217,9 +218,9 @@ public class LoginScreen extends javax.swing.JFrame {
                         .addComponent(jLabel6)
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(IPServidorField, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFieldIP_Servidor, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(diretorioField, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jFieldDiretorioServidor, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(butaoProcurar))
                             .addComponent(iniciarServidorButton))
@@ -236,7 +237,7 @@ public class LoginScreen extends javax.swing.JFrame {
                 .addGap(40, 40, 40)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(butaoProcurar)
-                    .addComponent(diretorioField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFieldDiretorioServidor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
@@ -246,7 +247,7 @@ public class LoginScreen extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
-                            .addComponent(IPServidorField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jFieldIP_Servidor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(iniciarServidorButton)))
                 .addContainerGap(34, Short.MAX_VALUE))
@@ -278,58 +279,59 @@ public class LoginScreen extends javax.swing.JFrame {
     private void jCheckBoxIPLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxIPLocalActionPerformed
         // TODO add your handling code here:
         if (jCheckBoxIPLocal.isSelected())
-        IPDestino.setText("localhost");
+            jFieldIP_Cliente.setText("localhost");
         else
-        IPDestino.setText("");
+            jFieldIP_Cliente.setText("");
     }//GEN-LAST:event_jCheckBoxIPLocalActionPerformed
 
-    private void portaFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portaFieldActionPerformed
+    private void jFieldPortaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldPortaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_portaFieldActionPerformed
+    }//GEN-LAST:event_jFieldPortaActionPerformed
 
-    private void IPDestinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPDestinoActionPerformed
+    private void jFieldIP_ClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldIP_ClienteActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_IPDestinoActionPerformed
+    }//GEN-LAST:event_jFieldIP_ClienteActionPerformed
 
     private void jFieldSenhaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldSenhaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jFieldSenhaActionPerformed
 
-    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        int porta = 0;
+    private void jButtonClienteLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClienteLoginActionPerformed
+        int porta = 0;   
+        Usuario usuario;
         
         try {
-            porta = Integer.parseInt(portaField.getText());
+            porta = Integer.parseInt(jFieldPorta.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Porta invalida");
             return;
-        }
         
-        if (verificarLogin()) {                        
-            Usuario usuario;
-            usuario = new Usuario(new DadosLogin(jFieldUsuario.getText(), obterSenha(jFieldSenha)));
-            if (fileSync.autenticarServidor(usuario, IPDestino.getText(),
-                porta) ) {
+        }
+        fileSync.iniciarCliente();
+        usuario = new Usuario(new DadosLogin(jFieldUsuario.getText(), obterSenha(jFieldSenha)));
+        
+        if (fileSync.autenticarServidor(usuario, jFieldIP_Cliente.getText(), porta)) {                                    
             //avisoDeLogin1.setText("Conexão estabelecida");
             //avisoDeLogin1.setVisible(true);
-                dispose();
-            }   else {
-                JOptionPane.showMessageDialog(null, "Sevidor na porta: " + porta + " não encontrado");
-            }   
+            dispose();
+            
+            //    JOptionPane.showMessageDialog(null, "Sevidor na porta: " + porta + " não encontrado");            
         }
         else {
             JOptionPane.showMessageDialog(null, "Usuário ou Senha incorreta!");
         }
-    }//GEN-LAST:event_LoginButtonActionPerformed
+    }//GEN-LAST:event_jButtonClienteLoginActionPerformed
 
     private void iniciarServidorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_iniciarServidorButtonActionPerformed
         // TODO add your handling code here:
         //Login sem escolha de pasta
         String serverName;
+        String pastaServidor;
         
-        serverName = IPServidorField.getText();
+        serverName = jFieldIP_Servidor.getText();
+        pastaServidor = jFieldDiretorioServidor.getText();
         
-        fileSync.iniciarServidor(serverName);
+        fileSync.iniciarServidor(serverName, pastaServidor);
         dispose();
         
         /* Login com escolha de pasta
@@ -343,19 +345,20 @@ public class LoginScreen extends javax.swing.JFrame {
         }*/
     }//GEN-LAST:event_iniciarServidorButtonActionPerformed
 
-    private void IPServidorFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IPServidorFieldActionPerformed
+    private void jFieldIP_ServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldIP_ServidorActionPerformed
         
-    }//GEN-LAST:event_IPServidorFieldActionPerformed
+    }//GEN-LAST:event_jFieldIP_ServidorActionPerformed
 
-    private void diretorioFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_diretorioFieldActionPerformed
+    private void jFieldDiretorioServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFieldDiretorioServidorActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_diretorioFieldActionPerformed
+    }//GEN-LAST:event_jFieldDiretorioServidorActionPerformed
 
     private void butaoProcurarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butaoProcurarActionPerformed
         // TODO add your handling code here:
-        diretorioField.setText(fileSync.escolherDiretorioServidor());
+        jFieldDiretorioServidor.setText(fileSync.escolherDiretorioServidor());
     }//GEN-LAST:event_butaoProcurarActionPerformed
     
+    /*
     public boolean verificarLogin() {
         boolean sucesso;
         
@@ -371,7 +374,7 @@ public class LoginScreen extends javax.swing.JFrame {
         }
         
         return sucesso;
-    }
+    }*/
 
     private String obterSenha(JPasswordField campoSenha) {
         char[] senha = campoSenha.getPassword();
@@ -380,14 +383,15 @@ public class LoginScreen extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel IPDestLabel;
-    private javax.swing.JTextField IPDestino;
-    private javax.swing.JTextField IPServidorField;
-    private javax.swing.JButton LoginButton;
     private javax.swing.JLabel avisoDeLogin1;
     private javax.swing.JButton butaoProcurar;
-    private javax.swing.JTextField diretorioField;
     private javax.swing.JButton iniciarServidorButton;
+    private javax.swing.JButton jButtonClienteLogin;
     private javax.swing.JCheckBox jCheckBoxIPLocal;
+    private javax.swing.JTextField jFieldDiretorioServidor;
+    private javax.swing.JTextField jFieldIP_Cliente;
+    private javax.swing.JTextField jFieldIP_Servidor;
+    private javax.swing.JTextField jFieldPorta;
     private javax.swing.JPasswordField jFieldSenha;
     private javax.swing.JTextField jFieldUsuario;
     private javax.swing.JLabel jLabel1;
@@ -397,7 +401,6 @@ public class LoginScreen extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextField portaField;
     private javax.swing.JLabel portaLabel;
     // End of variables declaration//GEN-END:variables
 }

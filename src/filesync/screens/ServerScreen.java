@@ -6,6 +6,7 @@
 package filesync.screens;
 
 import filesync.comunicao.ServidorTCP;
+import filesync.controle.FileSync;
 
 /**
  *
@@ -13,30 +14,16 @@ import filesync.comunicao.ServidorTCP;
  */
 public class ServerScreen extends javax.swing.JFrame {
 
-    private ServidorTCP servidor;
-    public static int porta = 5800;
-    /**
-     * Creates new form ServerScreen
-     */
-    public ServerScreen(String ip, String raiz) {
+    private ServidorTCP servidor;        
+    
+    public ServerScreen(String ip, int porta, String nomePasta) {
         initComponents();        
         this.setTitle("Log do servidor");
         this.setVisible(true);
-        servidor = new ServidorTCP(raiz, ip, logTextPane);        
+        servidor = new ServidorTCP(ip, porta, nomePasta, logTextPane);
         servidor.start();
     }
-    
-    public ServerScreen(String ip) {
-        initComponents();        
-        this.setTitle("Log do servidor");
-        this.setVisible(true);
-        servidor = new ServidorTCP(ip, porta, logTextPane);
-        servidor.start();
-    }
-    
-    public int getPorta() {
-        return servidor.getPorta();
-    }
+        
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -110,7 +97,8 @@ public class ServerScreen extends javax.swing.JFrame {
     }
     
     public static void main(String... args) {
-        new ServerScreen("localhost");
+        new ServerScreen("localhost",5800,
+            FileSync.getNomePasta());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

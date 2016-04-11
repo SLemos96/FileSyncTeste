@@ -5,11 +5,11 @@
  */
 package filesync.screens;
 
-import filesync.comunicao.ArvoreDeArquivos;
-import filesync.comunicao.ArvoreGraficaDeArquivos;
+import filesync.persistencia.ArvoreDeArquivos;
+import filesync.parametro.ArvoreGraficaDeArquivos;
 import filesync.comunicao.Cliente;
-import filesync.comunicao.FileSystemModel;
-import filesync.comunicao.Parametro;
+import filesync.persistencia.FileSystemModel;
+import filesync.parametro.Parametro;
 import java.io.File;
 import javax.swing.JFileChooser;
 import filesync.controle.AutenticadorUsuario;
@@ -41,9 +41,11 @@ public class MainScreen extends javax.swing.JFrame {
     private ArvoreDeArquivos arvoreDeArquivosRemota;
     private EscolhaDiretorio chooseDiretorio;
     private List<ArquivoDestino> arquivosDiferentes;
+    private Cliente cliente;
     
-    public MainScreen() {
-        initComponents();        
+    public MainScreen(Cliente cliente) {
+        initComponents();
+        this.cliente = cliente;
         arquivosDiferentes = new ArrayList<ArquivoDestino>();
         fsmRemoto = null;
     }
@@ -327,8 +329,8 @@ public class MainScreen extends javax.swing.JFrame {
             if (pastaLocalField.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
             } else {
-                compararArvoresDeArquivos();
-                JOptionPane.showMessageDialog(null, listarArquivosDiferentes());
+                //compararArvoresDeArquivos();
+                JOptionPane.showMessageDialog(null, "Nao implementado");
             }
         }
             
@@ -343,10 +345,8 @@ public class MainScreen extends javax.swing.JFrame {
         estaConectado();
         if (pastaLocalField.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
-        } else {
-            Cliente c = Cliente.getInstance();
-            c.obterListaDeArquivos();
-            
+        } else {            
+            cliente.obterListaDeArquivos();            
         }
         
     }//GEN-LAST:event_jButton4ActionPerformed
@@ -354,7 +354,7 @@ public class MainScreen extends javax.swing.JFrame {
     private void procurarLocalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarLocalButtonActionPerformed
         // TODO add your handling code here:        
         File dir = null;
-        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("file.separator")));
+        FileSystemModel fsm = new FileSystemModel(new File(System.getProperty("user.home")));
         
         EscolhaDiretorio ed = new EscolhaDiretorio(this, fsm, true);        
     }//GEN-LAST:event_procurarLocalButtonActionPerformed
@@ -362,14 +362,14 @@ public class MainScreen extends javax.swing.JFrame {
     private void procurarRemotoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarRemotoButtonActionPerformed
         // TODO add your handling code here:
         EscolhaDiretorio ed;
-        if (Cliente.getInstance().acessarPastaRemota())
+        if (cliente.acessarPastaRemota())
             ed = new EscolhaDiretorio(this, fsmRemoto, false);
         else
             JOptionPane.showMessageDialog(rootPane, "Falha no envio de mensagem");
     }//GEN-LAST:event_procurarRemotoButtonActionPerformed
     
     
-    
+    /*
     public String listarArquivosDiferentes() {
         String text = "";
         
@@ -381,7 +381,7 @@ public class MainScreen extends javax.swing.JFrame {
             text += "\n";
         }
         return text;
-    }
+    }*/
     
     public boolean estaConectado() {
         boolean sucesso;
@@ -400,7 +400,7 @@ public class MainScreen extends javax.swing.JFrame {
      * os arquivos que serão sincronizados na pasta do servidor ou do cliente,
      * e eles possuem nomes diferentes, caso sejam iguais o mais antigo será
      * sincronizado.
-     */
+     *
     private void compararArvoresDeArquivos() {
         
         File raizLocal = arvoreDeArquivosLocal.getRaiz();
@@ -425,7 +425,7 @@ public class MainScreen extends javax.swing.JFrame {
             File filhoRemoto = filhosRemoto.pollLast();
             filhosLocal = arquivosFilhos(arvoreDeArquivosLocal);
             compararArquivos(filhoRemoto, filhosLocal, false);
-        } */           
+        } *
     }
     
     private void compararArquivos(LinkedList<File> arquivos1, LinkedList<File> arquivos2, boolean toServer) {
@@ -506,12 +506,14 @@ public class MainScreen extends javax.swing.JFrame {
             return -1;
         else
             return 0;
-    }    
+    }    */
     
     public static void main(String[] args) {
+        
+        Cliente cliente = new Cliente();
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainScreen().setVisible(true);
+                new MainScreen(cliente).setVisible(true);
             }
         });
     }

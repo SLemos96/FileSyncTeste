@@ -5,7 +5,7 @@
  */
 package filesync.screens;
 
-import filesync.comunicao.FileSystemModel;
+import filesync.persistencia.FileSystemModel;
 import java.awt.Component;
 import java.io.File;
 import java.io.Serializable;
