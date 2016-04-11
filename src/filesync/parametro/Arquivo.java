@@ -31,6 +31,8 @@ public class Arquivo implements Parametro{
     private byte[] data;
     private boolean isDiretorio;
     private boolean isRemoto;
+    private Arquivo[] arquivosFilhos;
+    private String caminhoDeDownload;
     
     public Arquivo(File arquivo) {
         this.arquivo = arquivo;
@@ -39,9 +41,32 @@ public class Arquivo implements Parametro{
         this.tamanho = arquivo.length();
         this.ultimaAlteracao = arquivo.lastModified();
         this.isDiretorio = arquivo.isDirectory();
-        this.caminhoDeDestino = "";        
+        this.caminhoDeDestino = "";       
+    }
+    
+    public Arquivo(File filho, boolean isFilho) {
+        this.nomeDoArquivo = filho.getName();
+        this.ultimaAlteracao = filho.lastModified();
+        this.isDiretorio = filho.isDirectory();
     }
 
+    public boolean preencherFilhos() {
+        boolean preenchidos = false;
+        
+        File[] filhos = arquivo.listFiles();
+        int numeroDeFilhos = filhos.length;
+        arquivosFilhos = new Arquivo[numeroDeFilhos];
+        
+        for (int i = 0; i < numeroDeFilhos; i++) {
+            arquivosFilhos[i] = new Arquivo(filhos[i], true);
+            preenchidos = true;
+        }        
+        return preenchidos;
+    }
+    
+    public Arquivo[] getArquivosFilhos() {
+        return arquivosFilhos;
+    }
     
     public Arquivo(boolean isRemoto) {        
         this.isRemoto = isRemoto;
@@ -94,7 +119,15 @@ public class Arquivo implements Parametro{
         return caminhoDeDestino;
     }
 
-    public void setNomeDoDestino(String nomeDoDestino) {
+    public String getCaminhoDeDownload() {
+        return caminhoDeDownload;
+    }
+    
+    public void setCaminhoDeDownload(String caminhoDeDownload) {
+        this.caminhoDeDownload = caminhoDeDownload;
+    }
+    
+    public void setCaminhoDeDestino(String nomeDoDestino) {
         this.caminhoDeDestino = nomeDoDestino;
     }
             
@@ -245,7 +278,7 @@ public class Arquivo implements Parametro{
     
     @Override
     public String toString() {
-        return arquivo.getName();
+        return nomeDoArquivo;
     }
     
     @Override

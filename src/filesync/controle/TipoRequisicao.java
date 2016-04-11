@@ -20,7 +20,8 @@ public enum TipoRequisicao implements Serializable{
     ExibirArquivos("listar"),
     ExibirDiretoriosRemotos("criando arvore de diretórios remotos"),
     ExibirArquivosRemotos("listando arquivos remotos"),
-    ObterEscolhaRemotaDiretorio("Escolha de Diretorio remota");        
+    ObterEscolhaRemotaDiretorio("Escolha de Diretorio remota"),
+    BuscarArquivoRemoto("procurando arquivo ");        
         
     private final String descricao;
     

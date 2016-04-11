@@ -63,7 +63,30 @@ public class GeradorDeResposta {
             enviarArvoreDeArquivosRemotos((Arquivo)requisicao.getParametro());
         } else if (TipoRequisicao.ExibirDiretoriosRemotos == tipo) {
             exibirDiretoriosRemotos((Arquivo) requisicao.getParametro());
+        } else if (TipoRequisicao.BuscarArquivoRemoto == tipo) {
+            enviarArquivo((Arquivo) requisicao.getParametro());
         }
+    }
+    
+    public void enviarArquivo(Arquivo arquivo) {
+        //Reconstrução de caminho
+        String caminho = System.getProperty("user.home") +
+                 arquivo.getCaminhoDeDestino();
+        
+        File arquivoAux = new File(caminho);
+        
+        if (arquivoAux == null)
+            logDoServidor.escreverLogLine("arquivo: " + caminho + " não encontrado!");
+        
+        Arquivo arquivoLocal = new Arquivo(arquivoAux);
+                
+        if (!arquivoLocal.preencherFilhos()) {
+            logDoServidor.escreverLogLine("Nem todos os filhos do arquivo: "
+                    + arquivoLocal + " foram preenchidos");
+        } 
+        
+        resposta = new Reply(arquivoLocal);
+        conexao.enviarResposta(resposta);
     }
     
     public void enviarArvoreDeArquivosRemotos(Arquivo arquivoName) {

@@ -174,6 +174,24 @@ public class Cliente {
         return resposta.getSucesso();
     }
     
+    public void realizarDownloadArquivo(Arquivo arquivoRemoto) {
+        File arquivoLocal = new File(arquivoRemoto.getCaminhoDeDownload());        
+        byte[] data = resposta.getBytes();
+        
+        try {
+            FileOutputStream fos = new FileOutputStream(arquivoLocal);            
+            fos.write(data);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException ex) {
+            System.out.println("Arquivo: \n" + arquivoLocal.getAbsolutePath() + " nao foi aberto");            
+        }
+    }
+    
     public void realizarDownload(Arquivo arquivoRemoto) {
         File arquivoLocal;
         byte[] data;  
@@ -195,8 +213,7 @@ public class Cliente {
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullPointerException ex) {
-            System.out.println("Arquivo: \n" + arquivoLocal.getAbsolutePath() + " nao foi aberto");
-            
+            System.out.println("Arquivo: \n" + arquivoLocal.getAbsolutePath() + " nao foi aberto");            
         }                   
     }
     
@@ -216,14 +233,69 @@ public class Cliente {
     }
     
     public void sincronizarDiretorios(String diretorioLocal, String diretorioRemoto) {
-        
+        realizarDownloadDeArquivos(diretorioRemoto, diretorioLocal);
     }
     
-    private void realizarDownloadDeArquivos(File[] arquivos, String destino) {
+    private void realizarDownloadDeArquivos(String diretorioRemoto, String diretorioDestinoLocal) {
         
+        Arquivo[] arquivosRemotos = buscarArquivoRemoto(new Arquivo(diretorioRemoto));
+        if (arquivosRemotos == null)
+            return;
+        
+        for (Arquivo arquivoRemoto : arquivosRemotos) {
+            if (arquivoRemoto.isIsDiretorio()) {
+                diretorioDestinoLocal += fs + arquivoRemoto.getNomeDoArquivo();
+                // cria um diretorio local com o nome do arquivo
+                new File(diretorioDestinoLocal).mkdir();
+                realizarDownloadDeArquivos(diretorioRemoto, 
+                        diretorioDestinoLocal);
+            }  
+            // verifica se deve ou não baixar o arquivo
+            else {            
+                //if (verificarArquivo(diretorioDestinoLocal, arquivoRemoto))
+                    arquivoRemoto.setCaminhoDeDestino(diretorioRemoto + fs + arquivoRemoto);
+                    realizarDownload(arquivoRemoto);
+            }
+        }
     }
     
-    private void realizarUploadDeArquivos(File[] arquivos, String destino) {
+    /**
+     * Vasculha todos os arquivo presentes no diretorio informado, e verifica se
+     * o arquivo já existe e, caso exista, verifica qual é mais recente.
+     * @param diretorioLocal diretorio local de arquivos
+     * @param arquivo arquivo que será comparado com os arquivos do diretorio local
+     * @return true se o arquivo não existe no diretorio local ou se o arquivo existe e
+     * é mais recente. false, caso contrário.
+     */
+    public boolean verificarArquivo(String diretorioLocal, Arquivo arquivo) {
+        boolean baixarArquivo = false;
+        File[] filhos = new File(diretorioLocal).listFiles();
+        for (File filho : filhos) {
+            // se o arquivo possui o mesmo nome
+            if (filho.getName().equals(arquivo.getNomeDoArquivo())) {
+                if (arquivo.getUltimaAlteracao() > filho.lastModified())
+                    baixarArquivo = true;
+            }
+            else // arquivo novo
+                baixarArquivo = true;
+        }
+        return baixarArquivo;
+    }
+    
+    private Arquivo[] buscarArquivoRemoto(Arquivo arquivoRemoto) {
+        //Remocação do caminho local
+        String caminho = arquivoRemoto.getCaminhoDeDestino().replace(
+                System.getProperty("user.home") + fs + RAIZ_CLIENTE, "");
+        arquivoRemoto.setCaminhoDeDestino(caminho);
+        requisicao = new Request(TipoRequisicao.BuscarArquivoRemoto, arquivoRemoto);
+        
+        enviarRequisicao();
+        receberResposta();
+                
+        return ((Arquivo) resposta.getObject()).getArquivosFilhos();
+    }
+    
+    private void realizarUploadDeArquivos(String arquivos, String destino) {
         
     }
     
@@ -383,7 +455,7 @@ public class Cliente {
         Arquivo arquivo = new Arquivo(file);
         
         if (file.isFile()) {
-           arquivo.setNomeDoDestino(caminhoUsuariosRemotos + fileSystem);
+           arquivo.setCaminhoDeDestino(caminhoUsuariosRemotos + fileSystem);
            realizarDownload(arquivo);
         } else {
             file.mkdir();
@@ -413,7 +485,7 @@ public class Cliente {
             }
             else {
                 if (!filho.isHidden()) {
-                    raiz.setNomeDoDestino(caminhoEstendido + raiz);                
+                    raiz.setCaminhoDeDestino(caminhoEstendido + raiz);                
                     raiz.addCaminhoLocal(fs + filho.getName());
                     raiz.setNomeDoArquivo(filho.getName());
                     //raiz.setNomeDoArquivo(raiz+ fs + filho.getName());
@@ -464,7 +536,7 @@ public class Cliente {
         for (File file : arquivos) {
             if (file.isFile()) {
                 arquivoDeDownload = new Arquivo(file);
-                arquivoDeDownload.setNomeDoDestino(destinoDoArquivo + file.getName());
+                arquivoDeDownload.setCaminhoDeDestino(destinoDoArquivo + file.getName());
                 c.realizarDownload(arquivoDeDownload);
             } else {
                 new File(destinoDoArquivo + file.getName()).mkdir();
@@ -475,7 +547,7 @@ public class Cliente {
         nomeDoArquivoDeUpload = "C:\\Users\\Francisco\\Documents";
         
         Arquivo arquivoDeUpload = new Arquivo(new File(nomeDoArquivoDeUpload));
-        arquivoDeUpload.setNomeDoDestino("C:\\Users\\Francisco\\");
+        arquivoDeUpload.setCaminhoDeDestino("C:\\Users\\Francisco\\");
         
         c.realizarUpload(arquivoDeUpload);
         
