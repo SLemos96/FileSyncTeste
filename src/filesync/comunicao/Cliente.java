@@ -215,6 +215,18 @@ public class Cliente {
         return arquivoRemoto;
     }
     
+    public void sincronizarDiretorios(String diretorioLocal, String diretorioRemoto) {
+        
+    }
+    
+    private void realizarDownloadDeArquivos(File[] arquivos, String destino) {
+        
+    }
+    
+    private void realizarUploadDeArquivos(File[] arquivos, String destino) {
+        
+    }
+    
     public void obterListaDeArquivos() {
         requisicao = new Request(TipoRequisicao.ObterListaArquivo, null);
         

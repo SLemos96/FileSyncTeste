@@ -132,7 +132,7 @@ public class MainScreen extends javax.swing.JFrame {
         jTreeRemota = new javax.swing.JTree();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTreeLocal = new javax.swing.JTree();
-        jButton4 = new javax.swing.JButton();
+        jButtonSincronizar = new javax.swing.JButton();
         jButtonComparar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -260,10 +260,10 @@ public class MainScreen extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jButton4.setText("Sincronizar");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        jButtonSincronizar.setText("Sincronizar");
+        jButtonSincronizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                jButtonSincronizarActionPerformed(evt);
             }
         });
 
@@ -291,7 +291,7 @@ public class MainScreen extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonSincronizar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonComparar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -307,7 +307,7 @@ public class MainScreen extends javax.swing.JFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton4)
+                    .addComponent(jButtonSincronizar)
                     .addComponent(jButtonComparar))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -342,16 +342,16 @@ public class MainScreen extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_pastaRemotaFieldActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+    private void jButtonSincronizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSincronizarActionPerformed
         // TODO add your handling code here:
         estaConectado();
         if (pastaLocalField.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Selecione a pasta que será sincronizada");
         } else {            
-            cliente.obterListaDeArquivos();            
+            cliente.sincronizarDiretorios(pastaLocalField.getText(), pastaRemotaField.getText());            
         }
         
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_jButtonSincronizarActionPerformed
 
     private void procurarLocalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procurarLocalButtonActionPerformed
         // TODO add your handling code here:        
@@ -537,8 +537,8 @@ public class MainScreen extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButtonComparar;
+    private javax.swing.JButton jButtonSincronizar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
