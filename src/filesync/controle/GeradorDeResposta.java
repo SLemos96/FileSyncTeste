@@ -80,10 +80,7 @@ public class GeradorDeResposta {
         
         Arquivo arquivoLocal = new Arquivo(arquivoAux);
                 
-        if (!arquivoLocal.preencherFilhos()) {
-            logDoServidor.escreverLogLine("Nem todos os filhos do arquivo: "
-                    + arquivoLocal + " foram preenchidos");
-        } 
+        arquivoLocal.preencherFilhos();
         
         resposta = new Reply(arquivoLocal);
         conexao.enviarResposta(resposta);
@@ -230,12 +227,16 @@ public class GeradorDeResposta {
     }
     
     private void realizarUpload(Arquivo arquivoRequerido) {
+        //Reconstrução de caminho
+        String caminho = System.getProperty("user.home") +
+                 arquivoRequerido.getCaminhoDeDestino();
+        
         int size;
         FileInputStream fis;
         File arquivoLocal;
         byte[] data;      
         
-        arquivoLocal = new File(arquivoRequerido.getCaminhoLocal());
+        arquivoLocal = new File(caminho);
                 
         try {
             logDoServidor.escreverLogLine("realizando upload do arquivo: '" + arquivoRequerido.getCaminhoLocal()+"'");

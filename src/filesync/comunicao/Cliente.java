@@ -195,15 +195,26 @@ public class Cliente {
     public void realizarDownload(Arquivo arquivoRemoto) {
         File arquivoLocal;
         byte[] data;  
-         
+        
+        //Remocação do caminho local
+        String caminho = arquivoRemoto.getCaminhoDeDestino().replace(
+                System.getProperty("user.home") + fs + RAIZ_CLIENTE, "");
+        
+        arquivoRemoto.setCaminhoDeDestino(caminho);
+        
         requisicao = new Request(TipoRequisicao.Download, arquivoRemoto);        
+        
         enviarRequisicao();
         receberResposta();
                 
-        arquivoLocal = new File(arquivoRemoto.getNomeDoDestino());        
+        arquivoLocal = new File(arquivoRemoto.getCaminhoDeDownload());
+                
         data = resposta.getBytes();
         
         try {
+            if (arquivoLocal.createNewFile()) {
+                System.out.println("Arquivo " + arquivoLocal.getAbsolutePath() + " criado com sucesso");
+            }
             FileOutputStream fos = new FileOutputStream(arquivoLocal);            
             fos.write(data);
             fos.flush();
@@ -212,6 +223,7 @@ public class Cliente {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Arquivo " + arquivoLocal.getAbsolutePath() + " não foi criado com sucesso");
         } catch (NullPointerException ex) {
             System.out.println("Arquivo: \n" + arquivoLocal.getAbsolutePath() + " nao foi aberto");            
         }                   
@@ -237,10 +249,12 @@ public class Cliente {
     }
     
     private void realizarDownloadDeArquivos(String diretorioRemoto, String diretorioDestinoLocal) {
+        String nomeDiretorio = diretorioDestinoLocal;
         
-        Arquivo[] arquivosRemotos = buscarArquivoRemoto(new Arquivo(diretorioRemoto));
+        Arquivo diretorio = new Arquivo(diretorioRemoto);
+        Arquivo[] arquivosRemotos = buscarArquivoRemoto(diretorio);
         if (arquivosRemotos == null)
-            return;
+            return;                
         
         for (Arquivo arquivoRemoto : arquivosRemotos) {
             if (arquivoRemoto.isIsDiretorio()) {
@@ -254,6 +268,7 @@ public class Cliente {
             else {            
                 //if (verificarArquivo(diretorioDestinoLocal, arquivoRemoto))
                     arquivoRemoto.setCaminhoDeDestino(diretorioRemoto + fs + arquivoRemoto);
+                    arquivoRemoto.setCaminhoDeDownload(nomeDiretorio + fs + arquivoRemoto);
                     realizarDownload(arquivoRemoto);
             }
         }

@@ -382,8 +382,7 @@ public class MainScreen extends javax.swing.JFrame {
             pastaLocal = escolherDiretorio.getSelectedFile();
             // setar o nome apenas do caminho retirando o System.getproperty("user.home");
             setPastaRemotaField(pastaLocal.getAbsolutePath());
-            mostrarPainelDiretorio(new FileSystemModel(pastaLocal), false);
-            
+            mostrarPainelDiretorio(new FileSystemModel(pastaLocal), false);            
         }
     }//GEN-LAST:event_procurarRemotoButtonActionPerformed
         

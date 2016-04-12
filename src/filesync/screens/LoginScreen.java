@@ -37,7 +37,8 @@ public class LoginScreen extends javax.swing.JFrame {
             Logger.getLogger(LoginScreen.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        jFieldDiretorioServidor.setText(System.getProperty("user.home")+"\\FileSyncRemote");
+        jFieldDiretorioServidor.setText(System.getProperty("user.home")+ 
+                System.getProperty("file.separator") + "FileSyncRemote");
     }
 
     /**
