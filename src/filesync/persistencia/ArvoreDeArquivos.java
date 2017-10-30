@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.comunicao;
+package filesync.persistencia;
 
+import filesync.parametro.Parametro;
 import filesync.persistencia.Tree;
 import java.awt.List;
 import java.util.TreeMap;
@@ -12,15 +13,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Armazena uma arvore de arquivos
  * @author Francisco
  */
-public class ArvoreDeArquivos implements Serializable, Parametro{
-    private final Tree<File> arvoreDeArquivos;
+public class ArvoreDeArquivos implements Serializable, Parametro, Cloneable{
+    private Tree<File> arvoreDeArquivos;
     private File raiz;
     
+    public ArvoreDeArquivos(File raiz, Tree<File> arvoreDeArquivos) {
+        this.raiz = raiz;
+        this.arvoreDeArquivos = arvoreDeArquivos;
+    }
     /**
      *
      * @param raiz
@@ -66,19 +73,23 @@ public class ArvoreDeArquivos implements Serializable, Parametro{
         } else {
             arvoreDeArquivos.addLeaf(raiz.getParentFile(), raiz);
         }
+    }        
+        
+    public boolean isDiretorio(File diretorio) {
+        return arvoreDeArquivos.containsElement(diretorio);
     }
     
     public boolean contemArquivo(File arquivo) {
-        
-        return true;
+        return arvoreDeArquivos.containsElement(arquivo);
     }
     
-    public boolean contemDiretorio(File diretorio) {
-        return true;
+    public ArrayList<File> getFilhos(File arquivo) {
+        return new ArrayList<>(arvoreDeArquivos.getSuccessors(arquivo));
     }
+    
     
     public File getArquivo(File arquivo) {
-        return null;
+        return arvoreDeArquivos.getTree(arquivo).getHead();
     }
     
     public void limparArvore() {
@@ -97,9 +108,21 @@ public class ArvoreDeArquivos implements Serializable, Parametro{
                 new ArvoreDeArquivos(raiz);
         System.out.println(arvoreDeArquivos.listaDeArquivos());
     }
+    
+    
+    //Método pouco ineficiente
+    public ArvoreDeArquivos subArvoreDeArquivos(File arquivoFilho) {
+        return new ArvoreDeArquivos(arquivoFilho, arvoreDeArquivos.getTree(arquivoFilho));
+    }
 
     @Override
     public String tipoParametro() {
         return "arvore de arquivos";
+    }
+    
+    @Override
+    public ArvoreDeArquivos clone() throws CloneNotSupportedException {        
+        return (ArvoreDeArquivos) super.clone();
+        
     }
 }

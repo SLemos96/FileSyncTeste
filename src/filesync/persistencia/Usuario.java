@@ -5,11 +5,40 @@
  */
 package filesync.persistencia;
 
+import filesync.parametro.Parametro;
+import java.io.File;
+import java.io.Serializable;
+
 /**
  *
  * @author Francisco
  */
-public class Usuario {
+public class Usuario implements Serializable, Parametro{
     private DadosLogin dadosLogin;
+    private File diretorioAssociado;
     
+    public Usuario(DadosLogin dadosDeLogin) {
+        this.dadosLogin = dadosDeLogin;        
+    }
+
+    public DadosLogin getDadosLogin() {
+        return dadosLogin;
+    }
+
+    public void setDadosLogin(DadosLogin dadosLogin) {
+        this.dadosLogin = dadosLogin;
+    }
+
+    public File getDiretorioAssociado() {
+        return diretorioAssociado;
+    }
+
+    public void setDiretorioAssociado(File diretorioAssociado) {
+        this.diretorioAssociado = diretorioAssociado;
+    }
+
+    @Override
+    public String tipoParametro() {
+        return "usuario";
+    }            
 }

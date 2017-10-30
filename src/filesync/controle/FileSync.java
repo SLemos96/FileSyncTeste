@@ -5,9 +5,11 @@
  */
 package filesync.controle;
 
+import filesync.persistencia.ArvoreDeArquivos;
 import filesync.screens.*;
 import filesync.comunicao.*;
 import filesync.persistencia.BDArquivo;
+import filesync.persistencia.Usuario;
 import java.io.File;
 
 /**
@@ -16,8 +18,10 @@ import java.io.File;
  * @author Francisco
  */
 public class FileSync {
+    private static final String nomePasta = System.getProperty("user.home") +
+            System.getProperty("file.separator") + "FileSync" + System.getProperty("file.separator");
     private String serverName;
-    private final int portaPadrao = 2689;
+    private static int porta = 5800;
     private ServidorTCP servidor;
     private Cliente cliente;
     private AutenticadorUsuario autenticador;
@@ -27,44 +31,45 @@ public class FileSync {
     
     public FileSync() {                
         this.autenticador = new AutenticadorUsuario(new BDArquivo());
-        chooseDiretorio = new EscolhaDiretorio();        
-        cliente = new Cliente();        
-    }
-
-    public int getPortaPadrao() {
-        return portaPadrao;
+        chooseDiretorio = new EscolhaDiretorio();
     }
         
     public void iniciar() {
-        new LoginScreen(this).setVisible(true);        
+        new LoginScreen(this, porta).setVisible(true);        
+    }        
+    
+    public void iniciarCliente() {        
+        cliente  = new Cliente();        
     }
     
-    public void iniciarServidor(String ServerName, String pastaRaiz) {
-        telaServidor = new ServerScreen();
-        servidor = new ServidorTCP(telaServidor, pastaRaiz);        
-        servidor.start();
+    public void iniciarTelaPrincipal() {
+        cliente.mostrarTelaPrincipal();
     }
     
-    public int getPorta() {
-        return servidor.getPorta();
+    public static String getNomePasta() {
+        return nomePasta;
     }
+    
+    public static int getPorta() {
+        return porta;
+    }
+    
+    public void iniciarServidor(String serverName, String diretorioServidor) {
+        this.serverName = serverName;
+        new ServerScreen(serverName, porta, diretorioServidor);
+    }    
             
-    public boolean autenticarServidor(String serverName, int porta) {
-        boolean sucesso = cliente.conectarServidor(serverName, porta);
-        if (sucesso) {
+    public int autenticarServidor(Usuario usuario, String serverName, int porta) {
+        int opcao = cliente.conectarServidor(usuario, serverName, porta);/*
+        if (opcao == 1) {
             cliente.mostrarTelaPrincipal();
-            exibirArquivosRemotos();
-        } 
-        return sucesso;
+            new File(nomePasta+System.getProperty("file.separator")+ 
+                    "local" + System.getProperty("file.separator")).mkdir();
+            //cliente.exibirArquivosRemotos(usuario);
+        } */
+        return opcao;
     }
-    
-    public void exibirArquivosRemotos() {
-        Request requisicao;
-        requisicao = new Request(TipoRequisicao.ExibirArquivos, null);
-        cliente.enviarRequisicao(requisicao);
         
-        cliente.receberResposta();
-    }
     
     public boolean autenticarUsuario(String user, String senha) {
         boolean sucesso = autenticador.autenticarUsuario(user, senha);        

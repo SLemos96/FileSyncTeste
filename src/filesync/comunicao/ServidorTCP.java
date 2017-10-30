@@ -4,26 +4,33 @@
  * and open the template in the editor.
  */
 package filesync.comunicao;
+import filesync.persistencia.ArvoreDeArquivos;
 import filesync.comunicao.Request;
 import filesync.comunicao.Reply;
+import filesync.controle.AutenticadorUsuario;
+import filesync.persistencia.BDArquivo;
+import filesync.persistencia.Log;
 import filesync.screens.MainScreen;
 import filesync.screens.ServerScreen;
 import java.net.*;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javax.swing.JTextPane;
+import java.util.HashMap;
 /**
- * Aguarda uma conexão, recebe objetos e envia objetos.
+ * Aguarda uma conexão, recebe objetos e envia objetos, armazena arvore de diretorios
  * @author Francisco
  */
-public class ServidorTCP extends Thread{
-    private String mensagemServidor;
+public class ServidorTCP extends Thread{    
+    private String ipServer;
+    private String diretorioRaiz;
+    private Log logDoServidor;
     private ServerSocket serverSocket;
-    private Socket server;
+    private Socket cliente;
     private Request requisicao;
-    private ArvoreDeArquivos arvoreDeArquivos;
-    private ServerScreen telaServidor;
+    private HashMap<String, ArvoreDeArquivos> diretorioDosUsuarios;  
+    private AutenticadorUsuario autenticador;
     
     public ServidorTCP(int porta){
         try {
@@ -35,42 +42,45 @@ public class ServidorTCP extends Thread{
         } 
     }
 
-    
-    public ServidorTCP(ServerScreen telaServidor, String pastaRaiz)  {
+    public ServidorTCP(String ipServer, int porta, JTextPane logTextPane)  {
         try {
-            this.arvoreDeArquivos = new ArvoreDeArquivos(new File(pastaRaiz));
-            this.telaServidor = telaServidor;
-            this.telaServidor.setTitle("Log do servidor");
-            this.telaServidor.setVisible(true);
-            serverSocket = new ServerSocket(0);
-            mensagemServidor = "Servidor: " + serverSocket.getInetAddress().getLocalHost().getHostAddress() + "\n";
-            escreverLog();
-            
+            this.ipServer = ipServer;                                    
+            serverSocket = new ServerSocket(porta);
+            logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n");            
+            logTextPane.setText(logDoServidor.getLog());
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void escreverLog() {
-        telaServidor.setLogTextPane(mensagemServidor);
+    public ServidorTCP(String ipServer, int porta, String pastaRaiz, JTextPane logTextPane)  {
+        try {
+            this.ipServer = ipServer;
+            this.diretorioRaiz = pastaRaiz;
+            this.diretorioDosUsuarios = new HashMap<String, ArvoreDeArquivos>();
+            serverSocket = new ServerSocket(porta);
+            logDoServidor = new Log(logTextPane,"Servidor: " + ipServer + "\n"
+                    + "diretorio criado em: " + pastaRaiz + "\n");
+            this.autenticador = new AutenticadorUsuario(new BDArquivo());
+            new File(pastaRaiz).mkdir();
+            logTextPane.setText(logDoServidor.getLog());
+        } catch (ConnectException e) {
+            logDoServidor.escreverLogLine("A porta " + porta + " atualmente já se encontra em uso");
+        } catch (IOException ex) {
+            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
+    
+    public void escreverLog(String mensagem) {
+        logDoServidor.escreverLogLine(mensagem);        
+    }
+    
     public void run() {
-        aguardarConexao();
-        while(true) {
-            receberRequisicao();
-        }
-        
+        while (true) {
+            aguardarConexao();
+        }                
     }
 
-    public String getMensagemServidor() {
-        return mensagemServidor;
-    }
-
-    public void setMensagemServidor(String mensagemServidor) {
-        this.mensagemServidor = mensagemServidor;
-    }    
-    
-    
     public ServerSocket getServerSocket() {
         return serverSocket;
     }
@@ -79,83 +89,26 @@ public class ServidorTCP extends Thread{
         return serverSocket.getLocalPort();
     }
     
-    public void aguardarConexao() {
-        mensagemServidor += "Esperando cliente na porta: " +
-                serverSocket.getLocalPort() + "\n";
-        escreverLog();
+    public void aguardarConexao() {        
+        escreverLog("Esperando cliente na porta: " +
+                serverSocket.getLocalPort());
         try {
-            server = serverSocket.accept();
+            cliente = serverSocket.accept();
+            escreverLog("Conexão estabelecida com " +
+                cliente.getRemoteSocketAddress());
+            Thread conexao = new Conexao(cliente, logDoServidor, diretorioDosUsuarios, diretorioRaiz, autenticador);
+            conexao.start();
+            conexao.join();                                    
         } catch (IOException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        mensagemServidor += "Conexão estabelecida com " +
-                server.getRemoteSocketAddress() + "\n";
-        escreverLog();
-    }
-    
-    public void receberRequisicao() {
-        try {
-            mensagemServidor += "Recebendo requisicao...\n";
-            escreverLog();
-            DataInputStream dis = new DataInputStream(server.getInputStream());
-            ObjectInputStream oos = new ObjectInputStream(dis);
-            Request requisicao = (Request) oos.readObject();
-            analisarRequisicao(requisicao);
-        } catch (IOException ex) {
+        } catch (InterruptedException ex) {
             Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception e) {
-            
-        }
-    }
-    
-    public void analisarRequisicao(Request requisicao) {
-        mensagemServidor += "analisando requisicao...\n";
-        TipoRequisicao tipo = requisicao.getRequisicao();
-        if (TipoRequisicao.Download == tipo) {
-            System.out.println("d");
-        } else if (TipoRequisicao.ExibirArquivos == tipo) {
-            exibirArquivosParaCliente();
-        } else if (TipoRequisicao.ObterListaArquivo == tipo) {
-            System.out.println("o");
-        } else if (TipoRequisicao.Upload == tipo) {
-            System.out.println("u");
-        }        
-    }
-    
-    public void exibirArquivosParaCliente() {
-        mensagemServidor += "cliente requer lista de arquivos no servidor\n";
-        escreverLog();
-        
-        Reply resposta = new Reply(arvoreDeArquivos, TipoRequisicao.ObterListaArquivo);
-        proverResposta(resposta);
-    }
-    
-    public byte[] serializarObjeto(Object requisicao) {
-        try {
-           ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            ObjectOutputStream ous;
-            ous = new ObjectOutputStream(bao);
-            ous.writeObject(requisicao);
-            return bao.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    public void proverResposta(Reply resposta) {
-        try {
-            DataOutputStream out = new DataOutputStream(server.getOutputStream());
-            ObjectOutputStream oos = new ObjectOutputStream(out);
-            oos.writeObject(resposta);            
-        } catch (IOException ex) {
-            Logger.getLogger(ServidorTCP.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+        }                
+    }   
 
-    public void setArvoreDeArquivos(ArvoreDeArquivos arvoreDeArquivos) {
-        this.arvoreDeArquivos = arvoreDeArquivos;
+    public Log getLogDoServidor() {
+        return logDoServidor;
     }
+    
+    
 }

@@ -5,6 +5,8 @@
  */
 package filesync.comunicao;
 
+import filesync.controle.TipoRequisicao;
+import filesync.parametro.Parametro;
 import java.io.*;
 
 /**
