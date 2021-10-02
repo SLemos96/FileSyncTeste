@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.comunicao;
+package filesync.controle;
 
 import java.io.Serializable;
 
@@ -13,11 +13,15 @@ import java.io.Serializable;
  */
 public enum TipoRequisicao implements Serializable{
     
+    Autenticacao("autenticando usuario"),
     Download("download"),
     Upload("upload"),
     ObterListaArquivo("obterDiretorio"),
-    ExibirArquivos("listar");
-    
+    ExibirArquivos("listar"),
+    ExibirDiretoriosRemotos("criando arvore de diretórios remotos"),
+    ExibirArquivosRemotos("listando arquivos remotos"),
+    ObterEscolhaRemotaDiretorio("Escolha de Diretorio remota"),
+    BuscarArquivoRemoto("procurando arquivo ");        
         
     private final String descricao;
     

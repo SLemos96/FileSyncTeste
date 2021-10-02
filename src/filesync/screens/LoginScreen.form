@@ -27,11 +27,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" min="-2" pref="507" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
-          </Group>
+          <Component id="jTabbedPane1" alignment="1" pref="558" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -71,28 +67,23 @@
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="LoginButton" min="-2" max="-2" attributes="0"/>
-                                  <Component id="portaField" min="-2" pref="55" max="-2" attributes="0"/>
+                                  <Component id="jButtonClienteLogin" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jFieldPorta" min="-2" pref="55" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="IPDestino" min="-2" pref="118" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" attributes="0">
+                                          <Component id="jFieldIP_Cliente" min="-2" pref="118" max="-2" attributes="0"/>
+                                          <Component id="jFieldUsuario" alignment="1" min="-2" pref="116" max="-2" attributes="0"/>
+                                          <Component id="jFieldSenha" alignment="0" min="-2" pref="116" max="-2" attributes="0"/>
+                                      </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="jCheckBoxIPLocal" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="SenhaDoUsuario" min="-2" pref="116" max="-2" attributes="0"/>
-                                  <Component id="LoginDoUsuario" min="-2" pref="116" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
+                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="245" max="32767" attributes="0"/>
+                      <EmptySpace pref="452" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -101,63 +92,67 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="LoginDoUsuario" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jFieldUsuario" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="SenhaDoUsuario" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jFieldSenha" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="IPDestLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="IPDestino" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jFieldIP_Cliente" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jCheckBoxIPLocal" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="portaField" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jFieldPorta" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="portaLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
-                      <Component id="LoginButton" min="-2" max="-2" attributes="0"/>
+                      <Component id="jButtonClienteLogin" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="39" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="LoginButton">
+            <Component class="javax.swing.JButton" name="jButtonClienteLogin">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Login"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LoginButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonClienteLoginActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JPasswordField" name="SenhaDoUsuario">
+            <Component class="javax.swing.JPasswordField" name="jFieldSenha">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SenhaDoUsuarioActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldSenhaActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JTextField" name="IPDestino">
+            <Component class="javax.swing.JTextField" name="jFieldIP_Cliente">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="localhost"/>
+              </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="IPDestinoActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldIP_ClienteActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JTextField" name="portaField">
+            <Component class="javax.swing.JTextField" name="jFieldPorta">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="portaFieldActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldPortaActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="IPDestLabel">
               <Properties>
-                <Property name="text" type="java.lang.String" value="IP_Dest:"/>
+                <Property name="text" type="java.lang.String" value="IP Servidor:"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JCheckBox" name="jCheckBoxIPLocal">
               <Properties>
+                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="IP Local"/>
               </Properties>
               <Events>
@@ -179,9 +174,9 @@
                 <Property name="text" type="java.lang.String" value="Senha:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="LoginDoUsuario">
+            <Component class="javax.swing.JTextField" name="jFieldUsuario">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LoginDoUsuarioActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldUsuarioActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>
@@ -205,9 +200,9 @@
                               <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="IPServidorField" alignment="0" min="-2" pref="118" max="-2" attributes="0"/>
+                                  <Component id="jFieldIP_Servidor" alignment="0" min="-2" pref="118" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
-                                      <Component id="diretorioField" min="-2" pref="325" max="-2" attributes="0"/>
+                                      <Component id="jFieldDiretorioServidor" min="-2" pref="325" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="butaoProcurar" min="-2" max="-2" attributes="0"/>
                                   </Group>
@@ -231,7 +226,7 @@
                       <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="butaoProcurar" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="diretorioField" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jFieldDiretorioServidor" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -243,7 +238,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="IPServidorField" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jFieldIP_Servidor" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="iniciarServidorButton" min="-2" max="-2" attributes="0"/>
@@ -260,9 +255,9 @@
                 <Property name="text" type="java.lang.String" value="IP_Servidor:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="IPServidorField">
+            <Component class="javax.swing.JTextField" name="jFieldIP_Servidor">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="IPServidorFieldActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldIP_ServidorActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JButton" name="iniciarServidorButton">
@@ -278,9 +273,9 @@
                 <Property name="horizontalAlignment" type="int" value="0"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="diretorioField">
+            <Component class="javax.swing.JTextField" name="jFieldDiretorioServidor">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="diretorioFieldActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFieldDiretorioServidorActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JButton" name="butaoProcurar">
@@ -293,7 +288,7 @@
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel4">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Diret&#xf3;rio:"/>
+                <Property name="text" type="java.lang.String" value="Diret&#xf3;rio_raiz:"/>
               </Properties>
             </Component>
           </SubComponents>

@@ -3,17 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package filesync.comunicao;
+package filesync.controle;
 
 
+import filesync.persistencia.ArvoreDeArquivos;
 import java.io.File;
-import filesync.comunicao.Parametro;
 import filesync.comunicao.*;
+
+
 /**
  *
  * @author janioxavier
  */
-public class ComparaArquivo implements Parametro{
+public class ComparaArquivo{
     public ComparaArquivo() {
         
     }
@@ -41,9 +43,5 @@ public class ComparaArquivo implements Parametro{
         return true;
     }
 
-    @Override
-    public String tipoParametro() {
-        return "comparar arquivos";
-    }
     
 }

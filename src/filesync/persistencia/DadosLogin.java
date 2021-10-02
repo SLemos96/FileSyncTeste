@@ -5,35 +5,36 @@
  */
 package filesync.persistencia;
 
+import filesync.parametro.Parametro;
+import java.io.Serializable;
+
 /**
  *
  * @author Francisco
  */
-public class DadosLogin {
-    private String nomeDeUsuario;
-    private String senha;
-    private String IP_remoto;
+public class DadosLogin implements Serializable, Parametro{
+    
+    private final String nomeDeUsuario;
+    private final String senha;
     
     public DadosLogin(String nomeDeUsuario, String senha) {
         this.nomeDeUsuario = nomeDeUsuario;
-        this.senha = senha;
+        this.senha = senha;        
     }
 
     public String getSenha() {
         return senha;
     }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
+    
+    public String getNomeDeUsuario() {
+        return nomeDeUsuario;
     }
-
-    public String getIP_remoto() {
-        return IP_remoto;
+    
+    @Override
+    public String tipoParametro() {
+        return "dados de login";
     }
-
-    public void setIP_remoto(String IP_remoto) {
-        this.IP_remoto = IP_remoto;
-    }
+    
     
     
 }
